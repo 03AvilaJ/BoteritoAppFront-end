@@ -5,16 +5,7 @@ import './HomePage.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const allImages = [
-  { src: '/imagen1.jpeg', tipo: 'Mural', Ilustracion_muralista: 'Realista', tecnica: 'Aerosol' },
-  { src: '/imagen2.jpeg', tipo: 'Graffiti', estilo: 'Abstracto', tecnica: 'Pincel' },
-  { src: '/imagen3.jpeg', tipo: 'Stencil', estilo: 'Pop Art', tecnica: 'Plantilla' },
-  { src: '/imagen4.jpeg', tipo: 'Mural', estilo: 'Cubismo', tecnica: 'Aerosol' },
-  { src: '/imagen5.jpeg', tipo: 'Graffiti', estilo: 'Realista', tecnica: 'Spray' },
-  { src: '/imagen6.jpeg', tipo: 'Stencil', estilo: 'Surrealista', tecnica: 'Plantilla' },
-  { src: '/imagen7.jpeg', tipo: 'Mural', estilo: 'Impresionista', tecnica: 'Pincel' },
-  { src: '/imagen8.jpeg', tipo: 'Graffiti', estilo: 'Abstracto', tecnica: 'Aerosol' },
-];
+
 
 const HomePage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,6 +13,7 @@ const HomePage = () => {
   const [showFilterOptions, setShowFilterOptions] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('');
   const [filterValue, setFilterValue] = useState('');
+  const [allImages, setAllImages] = useState([]);
   const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -49,6 +41,16 @@ const HomePage = () => {
     }, 10000);
     return () => clearInterval(interval);
   }, [groups.length]);
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/obras/listaObras')
+      .then(res => res.json())
+      .then(data => {
+        console.log("Respuesta completa del backend:", data);
+        setAllImages(data)})
+      .catch(err => console.error(err));
+  }, []);
+
 
   return (
     <div className="home-container">
@@ -151,12 +153,17 @@ const HomePage = () => {
             {groups.map((group, groupIndex) => (
               <div key={groupIndex} className="slide-group">
                 {group.map((img, index) => (
-                  <img key={index} src={img.src} alt={`Obra ${index}`} />
+                  <img
+                    key={index}
+                    src={img.link_obra} // 👈 Aquí usas el campo correcto del backend
+                    alt={`Obra ${index}`}
+                  />
                 ))}
               </div>
             ))}
           </div>
         </div>
+
       </main>
     </div>
   );

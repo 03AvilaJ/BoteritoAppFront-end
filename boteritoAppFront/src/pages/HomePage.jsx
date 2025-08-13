@@ -5,9 +5,11 @@ import './HomePage.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-
+const API_BASE_URL = "http://localhost:8080"
 
 const HomePage = () => {
+
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showFilterOptions, setShowFilterOptions] = useState(false);
@@ -19,15 +21,27 @@ const HomePage = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
+  const getFilterField = (img, filterType) => {
+    switch (filterType) {
+      case "tipo":
+        return img.tipo?.tipo_mural || "";
+      case "tecnica":
+        return img.tecnica?.tecnica || "";
+      case "estadoConservacion":
+        return img.estadoConservacion?.estado || "";
+      default:
+        return "";
+    }
+  }
   const getFilteredImages = () => {
     if (!selectedFilter || !filterValue) return allImages;
-    return allImages.filter((img) => img[selectedFilter] === filterValue);
+    return allImages.filter((img) => getFilterField(img, selectedFilter) === filterValue);
+  };
+  const getFilterOptions = (filterType) => {
+    const options = allImages.map(img => getFilterField(img, filterType));
+    return [...new Set(options)]; // eliminamos duplicados
   };
 
-  const getFilterOptions = (filterType) => {
-    const options = [...new Set(allImages.map((img) => img[filterType]))];
-    return options;
-  };
 
   const filteredImages = getFilteredImages();
   const groups = [];
@@ -43,13 +57,16 @@ const HomePage = () => {
   }, [groups.length]);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/obras/listaObras')
+    fetch(`${API_BASE_URL}/api/obras/listaObras`)
       .then(res => res.json())
       .then(data => {
         console.log("Respuesta completa del backend:", data);
-        setAllImages(data)})
+        setAllImages(data)
+      })
       .catch(err => console.error(err));
   }, []);
+
+  
 
 
   return (
@@ -97,10 +114,11 @@ const HomePage = () => {
                     }}
                   >
                     <option value="">-- Tipo --</option>
-                    <option value="tipo">Tipo</option>
-                    <option value="Ilustracion_muralista">Ilustracion muralista</option>
+                    <option value="tipo">Tipo de mural</option>
                     <option value="tecnica">Técnica</option>
+                    <option value="estadoConservacion">Estado de conservación</option>
                   </select>
+
 
                   {selectedFilter && (
                     <>

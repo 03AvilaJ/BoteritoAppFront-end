@@ -1,12 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import './RegistrarObra.css';
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 const API_BASE_URL = "http://localhost:8080";
+
+// Ícono para el marcador
+const markerIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.7/dist/images/marker-icon.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+
+// Componente para capturar clic en el mapa
+const LocationPicker = ({ setLatLng }) => {
+  useMapEvents({
+    click(e) {
+      setLatLng(e.latlng);
+    },
+  });
+  return null;
+};
 
 const RegistrarObra = () => {
   const [step, setStep] = useState(1);
 
-  // Estado para la obra
   const [obra, setObra] = useState({
     titulo: '',
     autor_name: '',
@@ -21,18 +40,25 @@ const RegistrarObra = () => {
     estadoConservacionId: '',
     superficieId: '',
     lat: '',
-    lng:'',
+    lng: '',
     direccion: '',
     estadoRegistradoId: '689b8fbd591b9c7ffe07d47e'
   });
 
-  // Estados para catálogos
   const [tecnicas, setTecnicas] = useState([]);
   const [tiposMural, setTiposMural] = useState([]);
   const [estadosConservacion, setEstadosConservacion] = useState([]);
   const [superficiesMural, setSuperficiesMural] = useState([]);
 
-  // Cargar catálogos desde backend
+  // Estado del mapa (centrado en Tunja)
+  const [latlng, setLatLng] = useState({ lat: 5.5353, lng: -73.3678 });
+
+  // Cuando cambia el marcador, actualizar en obra
+  useEffect(() => {
+    setObra({ ...obra, lat: latlng.lat, lng: latlng.lng });
+    // eslint-disable-next-line
+  }, [latlng]);
+
   useEffect(() => {
     const fetchCatalogos = async () => {
       try {
@@ -47,15 +73,10 @@ const RegistrarObra = () => {
           throw new Error("Error al obtener catálogos del backend");
         }
 
-        const dataTecnicas = await resTecnicas.json();
-        const dataTipos = await resTipos.json();
-        const dataConservacion = await resConservacion.json();
-        const dataSuperficies = await resSuperficies.json();
-
-        setTecnicas(dataTecnicas);
-        setTiposMural(dataTipos);
-        setEstadosConservacion(dataConservacion);
-        setSuperficiesMural(dataSuperficies);
+        setTecnicas(await resTecnicas.json());
+        setTiposMural(await resTipos.json());
+        setEstadosConservacion(await resConservacion.json());
+        setSuperficiesMural(await resSuperficies.json());
       } catch (error) {
         console.error("Error al cargar catálogos:", error);
       }
@@ -74,75 +95,62 @@ const RegistrarObra = () => {
     if (file) setObra({ ...obra, imagen: file });
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  try {
-    const formData = new FormData();
-
-    // 1) Agregar la imagen
-    if (obra.imagen) {
-      formData.append("imagen", obra.imagen);
+  const handleUseMyLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        setLatLng({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      });
+    } else {
+      alert("La geolocalización no es soportada por este navegador.");
     }
+  };
 
-    // 2) Agregar los demás campos como JSON
-    const obraData = { ...obra };
-    delete obraData.imagen; // eliminamos la imagen del objeto JSON
-    formData.append("obra", new Blob([JSON.stringify(obraData)], { type: "application/json" }));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      if (obra.imagen) {
+        formData.append("imagen", obra.imagen);
+      }
+      const obraData = { ...obra };
+      delete obraData.imagen;
+      formData.append("obra", new Blob([JSON.stringify(obraData)], { type: "application/json" }));
 
-    // Imprimir contenido de FormData
-    const data2 = {};
-for (let [key, value] of formData.entries()) {
-  if (value instanceof File) {
-    data2[key] = value.name; // solo nombre del archivo, no el contenido
-  } else {
-    data2[key] = value;
-  }
-}
-console.log(JSON.stringify(data2, null, 2));
-const obraBlob = formData.get("obra");
-obraBlob.text().then(text => console.log("Contenido obra:", text));
+      const response = await fetch(`${API_BASE_URL}/api/obras/guardarObra`, {
+        method: "POST",
+        body: formData
+      });
 
+      if (!response.ok) throw new Error("Error al registrar la obra");
 
+      const data = await response.json();
+      console.log("✅ Obra creada:", data);
 
-    const response = await fetch(`${API_BASE_URL}/api/obras/guardarObra`, {
-      method: "POST",
-      body: formData
-    });
-
-    if (!response.ok) throw new Error("Error al registrar la obra");
-
-    const data = await response.json();
-    console.log("✅ Obra creada:", data);
-
-    alert("Obra registrada correctamente.");
-    
-    setObra({
-      titulo: '',
-    autor_name: '',
-    tecnica: '',
-    fecha: '',
-    descripcion: '',
-    imagen: null,
-    alto: '',
-    ancho: '',
-    mensajeObra: '',
-    tipoMural: '',
-    estadoConservacionId: '',
-    superficieId: '',
-    lat: '',
-    lng:'',
-    direccion: '',
-    estadoRegistradoId: '689b8fbd591b9c7ffe07d47e'
-    });
-    setStep(1);
-
-  } catch (error) {
-    console.error("❌ Error:", error);
-    alert("Hubo un problema al registrar la obra");
-  }
-};
-
+      alert("Obra registrada correctamente.");
+      setObra({
+        titulo: '',
+        autor_name: '',
+        tecnica: '',
+        fecha: '',
+        descripcion: '',
+        imagen: null,
+        alto: '',
+        ancho: '',
+        mensajeObra: '',
+        tipoMural: '',
+        estadoConservacionId: '',
+        superficieId: '',
+        lat: '',
+        lng: '',
+        direccion: '',
+        estadoRegistradoId: '689b8fbd591b9c7ffe07d47e'
+      });
+      setStep(1);
+    } catch (error) {
+      console.error("❌ Error:", error);
+      alert("Hubo un problema al registrar la obra");
+    }
+  };
 
   return (
     <div className="registro-obra-container">
@@ -157,63 +165,26 @@ obraBlob.text().then(text => console.log("Contenido obra:", text));
         <form onSubmit={handleSubmit}>
           {step === 1 && (
             <>
-              <input
-                type="text"
-                name="titulo"
-                placeholder="Título"
-                value={obra.titulo}
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="text"
-                name="autor_name"
-                placeholder="Autor"
-                value={obra.autor_name}
-                onChange={handleChange}
-                required
-              />
-              <select
-                name="tecnica"
-                value={obra.tecnica}
-                onChange={handleChange}
-                required
-              >
+              {/* paso 1 */}
+              <input type="text" name="titulo" placeholder="Título" value={obra.titulo} onChange={handleChange} required />
+              <input type="text" name="autor_name" placeholder="Autor" value={obra.autor_name} onChange={handleChange} required />
+
+              <select name="tecnica" value={obra.tecnica} onChange={handleChange} required>
                 <option value="">Seleccione técnica</option>
                 {tecnicas.map((t) => (
                   <option key={t.id} value={t.id}>{t.tecnica}</option>
                 ))}
               </select>
 
-              <label htmlFor="fecha" className="input-label">
-                Fecha de creación del mural
-              </label>
-              <input
-                type="date"
-                id="fecha"
-                name="fecha"
-                value={obra.fecha}
-                onChange={handleChange}
-                required
-              />
+              <label htmlFor="fecha" className="input-label">Fecha de creación del mural</label>
+              <input type="date" id="fecha" name="fecha" value={obra.fecha} onChange={handleChange} required />
 
-              <textarea
-                name="descripcion"
-                placeholder="Descripción"
-                value={obra.descripcion}
-                onChange={handleChange}
-              />
+              <textarea name="descripcion" placeholder="Descripción" value={obra.descripcion} onChange={handleChange} />
 
               <label className="file-label">
                 Cargar Imagen
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleImageChange}
-                />
+                <input type="file" accept="image/*" capture="environment" onChange={handleImageChange} />
               </label>
-
               {obra.imagen && <p className="file-info">📸 Imagen lista: {obra.imagen.name}</p>}
 
               <button type="button" onClick={() => setStep(2)}>Siguiente</button>
@@ -222,6 +193,7 @@ obraBlob.text().then(text => console.log("Contenido obra:", text));
 
           {step === 2 && (
             <>
+              {/* paso 2 */}
               <input type="text" name="alto" placeholder="Alto" value={obra.alto} onChange={handleChange} />
               <input type="text" name="ancho" placeholder="Ancho" value={obra.ancho} onChange={handleChange} />
               <textarea name="mensajeObra" placeholder="Mensaje de la obra" value={obra.mensajeObra} onChange={handleChange} />
@@ -253,11 +225,29 @@ obraBlob.text().then(text => console.log("Contenido obra:", text));
               </div>
             </>
           )}
+
           {step === 3 && (
             <>
-              <input type="text" name="lat" placeholder="latitus" value={obra.lat} onChange={handleChange} />
-              <input type="text" name="lng" placeholder="Longitud" value={obra.lng} onChange={handleChange} />
-              <textarea name="direccion" placeholder="Direccion" value={obra.direccion} onChange={handleChange} />
+              {/* paso 3 con mapa */}
+              <MapContainer center={[5.5353, -73.3678]} zoom={14}>
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <LocationPicker setLatLng={setLatLng} />
+                <Marker position={[latlng.lat, latlng.lng]} icon={markerIcon} />
+              </MapContainer>
+
+              <button type="button" onClick={handleUseMyLocation} style={{ marginBottom: "10px" }}>
+                📍 Usar mi ubicación actual
+              </button>
+
+              <textarea
+                name="direccion"
+                placeholder="Dirección (opcional)"
+                value={obra.direccion}
+                onChange={handleChange}
+              />
 
               <div className="button-group">
                 <button type="button" onClick={() => setStep(2)}>Anterior</button>

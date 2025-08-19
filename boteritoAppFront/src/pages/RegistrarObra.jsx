@@ -118,7 +118,8 @@ const RegistrarObra = () => {
 
       const response = await fetch(`${API_BASE_URL}/api/obras/guardarObra`, {
         method: "POST",
-        body: formData
+        body: formData,
+        credentials: "include",
       });
 
       if (!response.ok) throw new Error("Error al registrar la obra");

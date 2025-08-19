@@ -11,6 +11,7 @@ const HomePage = () => {
 
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showFilterOptions, setShowFilterOptions] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('');
@@ -27,8 +28,8 @@ const HomePage = () => {
         return img.tipo?.tipo_mural || "";
       case "tecnica":
         return img.tecnica?.tecnica || "";
-      case "estadoConservacion":
-        return img.estadoConservacion?.estado || "";
+      case "ilustracion":
+        return img.ilustracion?.ilustracion || "";
       default:
         return "";
     }
@@ -49,6 +50,13 @@ const HomePage = () => {
     groups.push(filteredImages.slice(i, i + 4));
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % groups.length);
@@ -66,7 +74,7 @@ const HomePage = () => {
       .catch(err => console.error(err));
   }, []);
 
-  
+
 
 
   return (
@@ -84,14 +92,29 @@ const HomePage = () => {
         {/* 🔹 Botón de ingresar decente */}
         <div className="right-section">
           <span className="app-title">Boterito APP</span>
-          <button
-            className="btn-ingresar"
-            onClick={() => navigate('/login')}
-          >
-            <LogIn size={18} style={{ marginRight: '6px' }} />
-            Ingresar
-          </button>
+
+          {isLoggedIn ? (
+            <button
+              className="btn-ingresar"
+              onClick={() => {
+                handleLogout();
+                navigate("/");
+              }}
+            >
+              <LogIn size={18} style={{ marginRight: "6px" }} />
+              Cerrar sesión
+            </button>
+          ) : (
+            <button
+              className="btn-ingresar"
+              onClick={() => navigate("/login")}
+            >
+              <LogIn size={18} style={{ marginRight: "6px" }} />
+              Ingresar
+            </button>
+          )}
         </div>
+
       </header>
 
       {isMenuOpen && (
@@ -116,7 +139,7 @@ const HomePage = () => {
                     <option value="">-- Tipo --</option>
                     <option value="tipo">Tipo de mural</option>
                     <option value="tecnica">Técnica</option>
-                    <option value="estadoConservacion">Estado de conservación</option>
+                    <option value="ilustracion">Ilustracion</option>
                   </select>
 
 
@@ -140,11 +163,26 @@ const HomePage = () => {
               <li onClick={closeMenu}><Image size={20} /> <span>Galería</span></li>
 
               {/* 🔹 NUEVO BOTÓN: Registrar usuario */}
-              <li onClick={() => { closeMenu(); navigate('/registrarusuario'); }}>
+              <li
+                onClick={() => {
+                  closeMenu();
+                  navigate("/registrarusuario");                  
+                }}
+              >
                 <User size={20} /> <span>Registrar usuario</span>
               </li>
 
-              <li onClick={() => { closeMenu(); navigate('/registrar'); }}>
+              <li
+                onClick={() => {
+                  closeMenu();
+                  const token = localStorage.getItem("token");
+                  if (!token) {
+                    navigate("/login", { state: { from: "/registrar" } });
+                  } else {
+                    navigate("/registrar");
+                  }
+                }}
+              >
                 <Plus size={20} /> <span>Registrar obra</span>
               </li>
             </ul>

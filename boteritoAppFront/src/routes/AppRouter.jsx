@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import RegistrarObra from '../pages/RegistrarObra';
 import RegistrarUsuario from '../pages/RegistrarUsuario';
+import AdminObras from '../pages/AdminObras';
 import Login from '../pages/Login';
 
 export const AppRouter = () => {
@@ -11,6 +12,7 @@ export const AppRouter = () => {
         <Route path="/" element={<HomePage />} />
          <Route path="/registrar" element={<RegistrarObra />} />
          <Route path="/RegistrarUsuario" element={<RegistrarUsuario />} />
+         <Route path="/admin" element={<AdminObras />} />
         <Route path="/Login" element={<Login />} />
       </Routes>
     </BrowserRouter>

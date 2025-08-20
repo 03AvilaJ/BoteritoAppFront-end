@@ -450,20 +450,25 @@ html, body {
 .home-container > .navbar + * {
   margin-top: 0; /* controla el espaciado en el layout si aplica */
 }
-
-/* Ajustes responsivos: en pantallas pequeñas, reducir aún más */
-@media (max-width: 600px) {
-  .app-title {
-    font-size: 0.9rem;
-  }
-  .btn-ingresar {
-    padding: 0.2rem 0.45rem;
-    font-size: 0.8rem;
-    border-radius: 12px;
-  }
-  .menu-icon {
-    width: 18px;
-    height: 18px;
-  }
+/* Contenedor del carrusel */
+.carousel-container {
+  margin: 0;
+  padding: 0;
+  height: auto;           /* que se ajuste al contenido */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* Cada item del carrusel */
+.carousel-item {
+  margin: 0;
+  padding: 0;
+}
+
+/* Las imágenes: no se recortan ni deforman */
+.carousel-container img {
+  max-height: 120px;      /* ajusta el tamaño visible */
+  width: auto;
+  object-fit: contain;    /* no recorta nada */
+}

@@ -2,7 +2,8 @@ import { Menu, User, Filter, Image, Plus, LogIn } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const API_BASE_URL = "http://localhost:8080"
@@ -11,7 +12,8 @@ const HomePage = () => {
 
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("role"));
+  const [role, setRole] = useState(localStorage.getItem("role") || "");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showFilterOptions, setShowFilterOptions] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('');
@@ -50,11 +52,34 @@ const HomePage = () => {
     groups.push(filteredImages.slice(i, i + 4));
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  const handleLogout = async () => {
+  try {
+    // Elimina el rol del localStorage
+    localStorage.removeItem("role");
+    setRole("");
     setIsLoggedIn(false);
-    navigate("/login");
-  };
+
+
+    // Llamada al backend para limpiar cookie
+    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include", // necesario para mandar la cookie
+    });
+
+    if (response.ok) {
+      console.log("Logout exitoso");
+    } else {
+      console.error("Error al cerrar sesión");
+    }
+
+    // Cambiar estado y redirigir
+    setIsLoggedIn(false);
+    navigate("/");
+  } catch (error) {
+    console.error("Error en logout:", error);
+  }
+};
+
 
 
   useEffect(() => {
@@ -68,11 +93,19 @@ const HomePage = () => {
     fetch(`${API_BASE_URL}/api/obras/listaObras`)
       .then(res => res.json())
       .then(data => {
-        console.log("Respuesta completa del backend:", data);
         setAllImages(data)
       })
       .catch(err => console.error(err));
   }, []);
+
+  const customIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+    shadowSize: [41, 41],
+  });
 
 
 
@@ -92,7 +125,6 @@ const HomePage = () => {
         {/* 🔹 Botón de ingresar decente */}
         <div className="right-section">
           <span className="app-title">Boterito APP</span>
-
           {isLoggedIn ? (
             <button
               className="btn-ingresar"
@@ -166,7 +198,7 @@ const HomePage = () => {
               <li
                 onClick={() => {
                   closeMenu();
-                  navigate("/registrarusuario");                  
+                  navigate("/registrarusuario");
                 }}
               >
                 <User size={20} /> <span>Registrar usuario</span>
@@ -185,6 +217,17 @@ const HomePage = () => {
               >
                 <Plus size={20} /> <span>Registrar obra</span>
               </li>
+              {role === "ADMIN" && (
+                <li
+                onClick={() => {
+                  closeMenu();
+                  navigate("/admin");
+                  
+                }}
+              >
+                <Plus size={20} /> <span>Administrador</span>
+              </li>
+              )}
             </ul>
           </aside>
         </div>
@@ -196,13 +239,24 @@ const HomePage = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="© OpenStreetMap contributors"
           />
-        </MapContainer>
 
-        <section className="info-card">
-          <h1>Mural Tunjano</h1>
-          <img src="/imagen5.jpeg" alt="Mural" />
-          <p>Descripción breve de la obra</p>
-        </section>
+          {/* Puntos de las obras */}
+          {allImages.map((obra, i) => (
+            obra.ubicacion?.lat && obra.ubicacion?.lng && (
+              <Marker
+                key={i}
+                position={[obra.ubicacion.lat, obra.ubicacion.lng]}
+                icon={customIcon}
+              >
+                <Popup>
+                  <strong>{obra.titulo || "Obra"}</strong><br />
+                  {obra.descripcion || "Sin descripción"}<br />
+                  <img src={obra.link_obra} alt="obra" style={{ width: "100px" }} />
+                </Popup>
+              </Marker>
+            )
+          ))}
+        </MapContainer>
 
         <div className="carousel-fixed">
           <div className="slider" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>

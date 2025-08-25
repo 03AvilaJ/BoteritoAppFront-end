@@ -151,10 +151,11 @@ html, body {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 190px;
-  background: rgba(255, 255, 255, 0.95);
+  
+  background: #f1f1f1;
   overflow: hidden;
   z-index: 5;
+  padding: 10px;
 }
 
 .slider {
@@ -172,7 +173,6 @@ html, body {
 }
 
 .slide-group img {
-  width: 22%;
   height: 150px;
   object-fit: cover;
   border-radius: 8px;
@@ -450,25 +450,19 @@ html, body {
 .home-container > .navbar + * {
   margin-top: 0; /* controla el espaciado en el layout si aplica */
 }
-/* Contenedor del carrusel */
-.carousel-container {
-  margin: 0;
-  padding: 0;
-  height: auto;           /* que se ajuste al contenido */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-/* Cada item del carrusel */
-.carousel-item {
-  margin: 0;
-  padding: 0;
-}
-
-/* Las imágenes: no se recortan ni deforman */
-.carousel-container img {
-  max-height: 120px;      /* ajusta el tamaño visible */
-  width: auto;
-  object-fit: contain;    /* no recorta nada */
+/* Ajustes responsivos: en pantallas pequeñas, reducir aún más */
+@media (max-width: 600px) {
+  .app-title {
+    font-size: 0.9rem;
+  }
+  .btn-ingresar {
+    padding: 0.2rem 0.45rem;
+    font-size: 0.8rem;
+    border-radius: 12px;
+  }
+  .menu-icon {
+    width: 18px;
+    height: 18px;
+  }
 }

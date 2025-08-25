@@ -1,58 +1,35 @@
-import { useState } from "react"; 
+import { useState, useEffect } from "react"; 
 import { Menu, CheckCircle, XCircle, BookOpen, Edit3 } from "lucide-react";
 import "./AdminObras.css";
+
+const API_BASE_URL = "http://localhost:8080"
 
 export default function AdminObras() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [obras, setObras] = useState([
-    {
-      titulo: "Raíces Ancestrales",
-      autor: "Camilo López",
-      fecha: "2018-06-12",
-      tipografias: "Sans-serif",
-      ilustracion: "Realista",
-      tipoMural: "Mural Urbano",
-      tecnica: "Aerosol",
-      estadoConservacion: "Bueno",
-      altura: "3.5m",
-      anchura: "5m",
-      descripcion: "Representación de las raíces culturales de Tunja.",
-      superficie: "Ladrillo",
-      mensaje: "La identidad cultural sigue viva.",
-      contexto: "Homenaje a comunidades indígenas.",
-      localizacion: "Centro histórico de Tunja",
-      encargado: "Instituto de Cultura",
-      observaciones: "Requiere limpieza anual.",
-      estado: "registrado",
-    },
-    {
-      titulo: "Colores del Alma",
-      autor: "Diana Torres",
-      fecha: "2020-09-25",
-      tipografias: "Cursiva",
-      ilustracion: "Abstracta",
-      tipoMural: "Graffiti",
-      tecnica: "Spray",
-      estadoConservacion: "Regular",
-      altura: "2m",
-      anchura: "4m",
-      descripcion: "Un mural que representa emociones humanas.",
-      superficie: "Concreto",
-      mensaje: "La diversidad es nuestra fuerza.",
-      contexto: "Proyecto juvenil barrial.",
-      localizacion: "Barrio San Francisco",
-      encargado: "Alcaldía local",
-      observaciones: "Desgaste por humedad.",
-      estado: "registrado",
-    },
-  ]);
+  const [obras, setObras] = useState([]);
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [estado_registro, setEstadoRegistro] = useState(null);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
+
+  useEffect(() => {
+  fetch(`${API_BASE_URL}/api/obras`, {
+    method: "GET",
+    credentials: "include", // 🔥 esto envía la cookie con el JWT
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then(res => res.json())
+    .then(data => {
+      setObras(data);
+    })
+    .catch(err => console.error(err));
+}, []);
+
 
   // 🔹 Abrir modal con datos de la obra
   const abrirModal = (obra, index) => {
@@ -87,11 +64,40 @@ export default function AdminObras() {
   };
 
   // 🔹 Cambiar estado directamente desde los iconos
-  const cambiarEstado = (index, nuevoEstado) => {
+  // 🔹 Cambiar estado directamente desde los iconos
+const cambiarEstado = async (obra, index, estadoRegistroId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/obras/${obra.id}/validarobra?idRegisteredStatus=${estadoRegistroId}`,
+      {
+        method: "PATCH",
+        credentials: "include", // 👈 importante para enviar cookie JWT
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Error al actualizar la obra");
+    }
+
+    // ✅ Actualizamos el estado local
     const nuevasObras = [...obras];
-    nuevasObras[index] = { ...nuevasObras[index], estado: nuevoEstado };
+    nuevasObras[index] = {
+      ...obra,
+      registeredStatus: {
+        ...obra.registeredStatus,
+        id: estadoRegistroId,  // guardamos el nuevo id del estado
+      },
+    };
     setObras(nuevasObras);
-  };
+
+  } catch (err) {
+    console.error("Fallo en PATCH:", err);
+  }
+};
+
 
   const obrasFiltradas = obras.filter((obra) =>
     obra.titulo.toLowerCase().includes(search.toLowerCase())
@@ -161,68 +167,69 @@ export default function AdminObras() {
                 <th>Mensaje</th>
                 <th>Contexto</th>
                 <th>Localización</th>
-                <th>Encargado</th>
+                <th>Restaurador</th>
                 <th>Observaciones</th>
                 <th>Estado</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {obrasFiltradas.map((obra, i) => (
-                <tr key={i}>
-                  <td>{obra.titulo}</td>
-                  <td>{obra.autor}</td>
-                  <td>{obra.fecha}</td>
-                  <td>{obra.tipografias}</td>
-                  <td>{obra.ilustracion}</td>
-                  <td>{obra.tipoMural}</td>
-                  <td>{obra.tecnica}</td>
-                  <td>{obra.estadoConservacion}</td>
-                  <td>{obra.altura}</td>
-                  <td>{obra.anchura}</td>
-                  <td>{obra.descripcion}</td>
-                  <td>{obra.superficie}</td>
-                  <td>{obra.mensaje}</td>
-                  <td>{obra.contexto}</td>
-                  <td>{obra.localizacion}</td>
-                  <td>{obra.encargado}</td>
-                  <td>{obra.observaciones}</td>
-                  <td>
-                    <span
-                      className={`status ${
-                        obra.estado === "validado"
-                          ? "status-aprobado"
-                          : obra.estado === "rechazado"
-                          ? "status-rechazado"
-                          : "status-pendiente"
-                      }`}
-                    >
-                      {obra.estado}
-                    </span>
-                  </td>
-                  <td className="acciones">
-                    <Edit3
-                      size={20}
-                      className="icon-btn edit"
-                      onClick={() => abrirModal(obra, i)}
-                      title="Editar"
-                    />
-                    <CheckCircle
-                      size={20}
-                      className="icon-btn accept"
-                      onClick={() => cambiarEstado(i, "validado")}
-                      title="Aceptar"
-                    />
-                    <XCircle
-                      size={20}
-                      className="icon-btn reject"
-                      onClick={() => cambiarEstado(i, "rechazado")}
-                      title="Rechazar"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+  {obrasFiltradas.map((obra, i) => (
+    <tr key={i}>
+      <td>{obra.titulo}</td>
+      <td>{obra.autor_name}</td>
+      <td>{obra.fechaCreacion}</td>
+      <td>{obra.typography?.tipografia || "—"}</td>
+      <td>{obra.ilustracion?.ilustracion || "—"}</td>
+      <td>{obra.tipo?.tipo_mural || "—"}</td>
+      <td>{obra.tecnica?.tecnica || "—"}</td>
+      <td>{obra.estadoConservacion?.estado || "—"}</td>
+      <td>{obra.alto}</td>
+      <td>{obra.ancho}</td>
+      <td>{obra.descripcion}</td>
+      <td>{obra.surface?.superficie || "—"}</td>
+      <td>{obra.mensaje}</td>
+      <td>{obra.contexto_historico}</td>
+      <td>{obra.ubicacion?.direccion || "—"}</td>
+      <td>{obra.restaurador}</td>
+      <td>{obra.observaciones}</td>
+      <td>
+        <span
+          className={`status ${
+            obra.registeredStatus?.estado_registro === "validado"
+              ? "status-aprobado"
+              : obra.registeredStatus?.estado_registro === "rechazado"
+              ? "status-rechazado"
+              : "status-pendiente"
+          }`}
+        >
+          {obra.registeredStatus?.estado_registro}
+        </span>
+      </td>
+      <td className="acciones">
+        <Edit3
+          size={20}
+          className="icon-btn edit"
+          onClick={() => abrirModal(obra, i)}
+          title="Editar"
+        />
+        <CheckCircle
+          size={20}
+          className="icon-btn accept"
+          onClick={() => cambiarEstado(obra,i, "689b8fda591b9c7ffe07d47f")}
+          title="Aceptar"
+        />
+        <XCircle
+          size={20}
+          className="icon-btn reject"
+          onClick={() => cambiarEstado(obra,i, "689b8ff3591b9c7ffe07d480")}
+          title="Rechazar"
+        />
+      </td>
+    </tr>
+  ))}
+</tbody>
+
           </table>
         </div>
       </div>

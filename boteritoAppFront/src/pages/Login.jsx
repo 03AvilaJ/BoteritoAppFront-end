@@ -3,6 +3,8 @@ import { FcGoogle } from "react-icons/fc";
 import { useNavigate, useLocation } from "react-router-dom"; // 👈 Importante
 import "./Login.css";
 
+const API_BASE_URL = "http://localhost:8080"
+
 export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,21 +29,23 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: "include",
+        credentials: "include", // necesario
       });
+
+      const data = await response.json();
+
 
       if (!response.ok) {
         throw new Error("Credenciales inválidas o error en el servidor");
       }
 
-      const data = await response.json();
-
-      // Guardamos token
-      localStorage.setItem("token", data.token);
+      if (data.role) {
+      localStorage.setItem("role", data.role); // 👈 Guardamos el rol
+    }
 
       // 👈 Redirigir a la página donde estaba antes
       navigate(from, { replace: true });

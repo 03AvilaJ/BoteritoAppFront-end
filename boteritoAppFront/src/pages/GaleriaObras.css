@@ -1,0 +1,237 @@
+/* Contenedor general */
+.galeria-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+}
+
+/* Grid tipo “masonry simple” con tarjetas de tamaño fijo */
+.cards {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+}
+
+/* Tarjeta */
+.card {
+  position: relative;
+  width: 240px;          /* ← tamaño fijo de la tarjeta */
+  height: 320px;         /* ← tamaño fijo de la tarjeta */
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f5f5f5;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+/* Imagen */
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* ← evita que “estire” la imagen */
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.card:hover img {
+  transform: scale(1.03);
+}
+
+/* Información (título/autor) con degradado */
+.card-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 64px;
+  padding: 8px 10px;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0));
+}
+
+.card-info .title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.card-info .author {
+  margin: 2px 0 0;
+  font-size: 12px;
+  opacity: 0.95;
+}
+
+/* Botones flotantes (like/comentar) visibles al hover */
+.actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.card:hover .actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Botón circular */
+.circle-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.circle-btn:hover {
+  transform: scale(1.07);
+}
+
+/* Contador (badge) */
+.circle-btn .count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #111;
+  color: #fff;
+  font-size: 11px;
+  border-radius: 999px;
+  line-height: 1;
+  padding: 3px 6px;
+}
+
+/* Estado vacío / mensajes */
+.empty {
+  color: #666;
+  font-size: 14px;
+  padding: 16px;
+}
+
+/* Flecha hacia abajo */
+.arrow-down {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 14px solid #111;
+  margin-top: 18px;
+}
+
+/* Responsivo: tarjetas más grandes en móviles para aprovechar ancho */
+@media (max-width: 640px) {
+  .card {
+    width: 44vw;
+    height: 58vw;
+    max-width: 260px;
+    max-height: 340px;
+  }
+}
+
+/* --- Modal --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 80%;
+  max-width: 900px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-content {
+  display: flex;
+  gap: 20px;
+}
+
+.modal-left {
+  flex: 1;
+}
+
+.modal-img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.modal-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-right h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.modal-right .author {
+  font-weight: bold;
+  font-size: 14px;
+  color: #555;
+}
+
+.modal-right .desc {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 16px;
+  margin: 10px 0;
+}
+
+.comment-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #ccc;
+  border-radius: 24px;
+  padding: 8px 12px;
+}
+
+.comment-box input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 14px;
+}
+

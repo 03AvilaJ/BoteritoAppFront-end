@@ -53,32 +53,32 @@ const HomePage = () => {
   }
 
   const handleLogout = async () => {
-  try {
-    // Elimina el rol del localStorage
-    localStorage.removeItem("role");
-    setRole("");
-    setIsLoggedIn(false);
+    try {
+      // Elimina el rol del localStorage
+      localStorage.removeItem("role");
+      setRole("");
+      setIsLoggedIn(false);
 
 
-    // Llamada al backend para limpiar cookie
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: "POST",
-      credentials: "include", // necesario para mandar la cookie
-    });
+      // Llamada al backend para limpiar cookie
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include", // necesario para mandar la cookie
+      });
 
-    if (response.ok) {
-      console.log("Logout exitoso");
-    } else {
-      console.error("Error al cerrar sesión");
+      if (response.ok) {
+        console.log("Logout exitoso");
+      } else {
+        console.error("Error al cerrar sesión");
+      }
+
+      // Cambiar estado y redirigir
+      setIsLoggedIn(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Error en logout:", error);
     }
-
-    // Cambiar estado y redirigir
-    setIsLoggedIn(false);
-    navigate("/");
-  } catch (error) {
-    console.error("Error en logout:", error);
-  }
-};
+  };
 
 
 
@@ -219,14 +219,14 @@ const HomePage = () => {
               </li>
               {role === "ADMIN" && (
                 <li
-                onClick={() => {
-                  closeMenu();
-                  navigate("/admin");
-                  
-                }}
-              >
-                <Plus size={20} /> <span>Administrador</span>
-              </li>
+                  onClick={() => {
+                    closeMenu();
+                    navigate("/admin");
+
+                  }}
+                >
+                  <Plus size={20} /> <span>Administrador</span>
+                </li>
               )}
             </ul>
           </aside>
@@ -234,7 +234,13 @@ const HomePage = () => {
       )}
 
       <main className="main">
-        <MapContainer center={[5.538, -73.367]} zoom={13} scrollWheelZoom={false} className="map-background">
+        <MapContainer
+          center={[5.538, -73.367]}
+          zoom={13}
+          scrollWheelZoom={false}
+          className="map-background"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="© OpenStreetMap contributors"
@@ -258,21 +264,33 @@ const HomePage = () => {
           ))}
         </MapContainer>
 
-        <div className="carousel-fixed">
-          <div className="slider" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+        <div className="carousel-fixed relative">
+          <div
+            className="slider"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          >
             {groups.map((group, groupIndex) => (
               <div key={groupIndex} className="slide-group">
                 {group.map((img, index) => (
                   <img
                     key={index}
-                    src={img.link_obra} // 👈 Aquí usas el campo correcto del backend
+                    src={img.link_obra}
                     alt={`Obra ${index}`}
                   />
                 ))}
               </div>
             ))}
           </div>
+
+          {/* 👇 Botón centrado encima del carrusel */}
+          <button
+            onClick={() => navigate("/galeria")}
+            className="btn-ver-galeria px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition"
+          >
+            Ver Galería
+          </button>
         </div>
+
 
       </main>
     </div>

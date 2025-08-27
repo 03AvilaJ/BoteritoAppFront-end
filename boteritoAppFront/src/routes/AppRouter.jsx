@@ -4,6 +4,7 @@ import RegistrarObra from '../pages/RegistrarObra';
 import RegistrarUsuario from '../pages/RegistrarUsuario';
 import AdminObras from '../pages/AdminObras';
 import Login from '../pages/Login';
+import GaleriaObras from "../pages/GaleriaObras";
 
 export const AppRouter = () => {
   return (
@@ -13,6 +14,7 @@ export const AppRouter = () => {
          <Route path="/registrar" element={<RegistrarObra />} />
          <Route path="/RegistrarUsuario" element={<RegistrarUsuario />} />
          <Route path="/admin" element={<AdminObras />} />
+         <Route path="/galeria" element={<GaleriaObras />} />
         <Route path="/Login" element={<Login />} />
       </Routes>
     </BrowserRouter>

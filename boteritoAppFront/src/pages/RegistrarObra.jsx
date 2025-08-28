@@ -55,19 +55,23 @@ const RegistrarObra = () => {
 
   // Cuando cambia el marcador, actualizar en obra
   useEffect(() => {
-    setObra({ ...obra, lat: latlng.lat, lng: latlng.lng });
-    // eslint-disable-next-line
-  }, [latlng]);
+  setObra((prev) => ({
+    ...prev,
+    lat: latlng.lat,
+    lng: latlng.lng,
+  }));
+}, [latlng]);
+
 
   useEffect(() => {
     const fetchCatalogos = async () => {
       try {
         const [resTecnicas, resTipos, resConservacion, resSuperficies] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/tecnicas`),
-          fetch(`${API_BASE_URL}/api/tipos`),
-          fetch(`${API_BASE_URL}/api/conservacion`),
-          fetch(`${API_BASE_URL}/api/superficies`)
-        ]);
+        fetch(`${API_BASE_URL}/api/tecnicas`, { credentials: "include" }),
+        fetch(`${API_BASE_URL}/api/tipos`, { credentials: "include" }),
+        fetch(`${API_BASE_URL}/api/conservacion`, { credentials: "include" }),
+        fetch(`${API_BASE_URL}/api/superficies`, { credentials: "include" }),
+      ]);
 
         if (!resTecnicas.ok || !resTipos.ok || !resConservacion.ok || !resSuperficies.ok) {
           throw new Error("Error al obtener catálogos del backend");

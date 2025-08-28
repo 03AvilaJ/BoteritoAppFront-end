@@ -207,8 +207,7 @@ const HomePage = () => {
               <li
                 onClick={() => {
                   closeMenu();
-                  const token = localStorage.getItem("token");
-                  if (!token) {
+                  if (!isLoggedIn) {
                     navigate("/login", { state: { from: "/registrar" } });
                   } else {
                     navigate("/registrar");

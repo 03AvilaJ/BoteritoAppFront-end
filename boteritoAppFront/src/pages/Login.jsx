@@ -37,6 +37,7 @@ export default function Login() {
       });
 
       const data = await response.json();
+      console.log(data);
 
 
       if (!response.ok) {
@@ -45,6 +46,9 @@ export default function Login() {
 
       if (data.role) {
       localStorage.setItem("role", data.role); // 👈 Guardamos el rol
+    }
+    if (data.pseudonimo) {
+      localStorage.setItem("pseudonimo", data.pseudonimo); // 👈 Guardamos el rol
     }
 
       // 👈 Redirigir a la página donde estaba antes

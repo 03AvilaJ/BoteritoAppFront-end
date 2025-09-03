@@ -153,7 +153,14 @@ const HomePage = () => {
         <div className="menu-overlay" onClick={closeMenu}>
           <aside className="sidebar" onClick={(e) => e.stopPropagation()}>
             <ul>
-              <li onClick={closeMenu}><User size={20} /> <span>Perfil</span></li>
+              <li onClick={() => {
+                  closeMenu();
+                  if (!isLoggedIn) {
+                    navigate("/login", { state: { from: "/registrar" } });
+                  } else {
+                    navigate("/perfil");
+                  }
+                }}><User size={20} /> <span>Perfil</span></li>
               <li onClick={() => setShowFilterOptions(!showFilterOptions)}>
                 <Filter size={20} /> <span>Filtros</span>
               </li>

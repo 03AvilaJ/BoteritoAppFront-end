@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { useNavigate, useLocation } from "react-router-dom"; // 👈 Importante
+import { useNavigate, useLocation } from "react-router-dom"; 
+import { GoogleLogin } from "@react-oauth/google";
 import "./Login.css";
 
 const API_BASE_URL = "http://localhost:8080"
@@ -61,6 +62,34 @@ export default function Login() {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const token = credentialResponse.credential; // 👈 JWT de Google
+
+      const response = await fetch(`${API_BASE_URL}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Error con Google login");
+
+      if (data.role) localStorage.setItem("role", data.role);
+      if (data.pseudonimo) localStorage.setItem("pseudonimo", data.pseudonimo);
+      console.log(data.role)
+
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleGoogleFailure = () => {
+    setError("Error al iniciar sesión con Google");
+  };
+
   return (
     <div className="login-page">
       <div className="overlay"></div>
@@ -82,9 +111,12 @@ export default function Login() {
           No tienes una cuenta? <a href="/RegistrarUsuario">Regístrate</a>
         </p>
 
-        <button type="button" className="btn-google">
-          <FcGoogle size={20} /> Iniciar con Google
-        </button>
+        <div className="btn-google">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleFailure}
+          />
+        </div>
       </div>
     </div>
   );

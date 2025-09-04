@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import "./Perfil.css";
 
-const API_BASE_URL = "http://localhost:8080"
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const Perfil = () => {
   const navigate = useNavigate();

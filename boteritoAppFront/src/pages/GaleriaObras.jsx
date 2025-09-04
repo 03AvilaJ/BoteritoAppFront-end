@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Heart, MessageCircle, X } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import "./GaleriaObras.css";
 
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function GaleriaObras() {
   const [allImages, setAllImages] = useState([]);
@@ -11,273 +11,246 @@ export default function GaleriaObras() {
   const [selectedObra, setSelectedObra] = useState(null);
   const [isLoggedIn] = useState(!!localStorage.getItem("role"));
   const [pseudonimo_user] = useState(localStorage.getItem("pseudonimo"));
+  const [animatingLike, setAnimatingLike] = useState(null);
+  const [userRating, setUserRating] = useState(0); // calificación seleccionada
+  const [hoverRating, setHoverRating] = useState(0); // para hover visual
+
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/obras/listaObras`)
-      .then((res) => res.json())
-      .then((data) => {
-        setAllImages(data || []);
-      })
-      .catch((err) => console.error(err))
+      .then(res => res.json())
+      .then(data => setAllImages(data || []))
+      .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
 
-  const handleLike = async (obraId) => {
-
-    if (!isLoggedIn) {
-      navigate("/login"); // 👈 si no está logeado, lo mandamos al login
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/obras/${obraId}/like`,
-        {
-          method: "GET",
-          credentials: "include", // 👈 importante para la cookie
-        }
-      );
-
-      if (!response.ok) {
-        console.error("Error al agregar like:", response.status);
-        return;
-      }
-
-      const newLike = await response.json();
-
-      // ✅ actualizar comentarios en selectedObra
-      setSelectedObra((prev) =>
-        prev
-          ? { ...prev, likes: [...(prev.likes || []), newLike] }
-          : prev
-      );
-
-      // ✅ actualizar comentarios en allImages
-      setAllImages((prev) =>
-        prev.map((obra) =>
-          obra.id === obraId
-            ? { ...obra, likes: [...(obra.likes || []), newLike] }
-            : obra
-        )
-      );
-    } catch (error) {
-      console.error("Error en la petición:", error);
-    }
+  const calcularPromedio = (calificaciones) => {
+    if (!calificaciones || calificaciones.length === 0) return 0;
+    const total = calificaciones.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+    return (total / calificaciones.length).toFixed(1); // un decimal
   };
 
 
-  // 🔹 Agregar comentario al backend
+  const handleLike = async (obraId) => {
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+
+    setAnimatingLike(obraId);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/obras/${obraId}/like`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) return;
+
+      const liked = await response.json(); // boolean
+
+      setAllImages(prev =>
+        prev.map(obra => {
+          if (obra.id !== obraId) return obra;
+          const likesArray = obra.likes || [];
+          if (liked && !likesArray.some(l => l.user_name === pseudonimo_user)) {
+            return { ...obra, likes: [...likesArray, { user_name: pseudonimo_user }] };
+          } else if (!liked) {
+            return { ...obra, likes: likesArray.filter(l => l.user_name !== pseudonimo_user) };
+          }
+          return obra;
+        })
+      );
+
+      if (selectedObra && selectedObra.id === obraId) {
+        const likesArray = selectedObra.likes || [];
+        setSelectedObra(prev => {
+          if (!prev) return prev;
+          if (liked && !likesArray.some(l => l.user_name === pseudonimo_user)) {
+            return { ...prev, likes: [...likesArray, { user_name: pseudonimo_user }] };
+          } else if (!liked) {
+            return { ...prev, likes: likesArray.filter(l => l.user_name !== pseudonimo_user) };
+          }
+          return prev;
+        });
+      }
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setTimeout(() => setAnimatingLike(null), 500); // dura la animación
+    }
+  };
+
   const handleComment = async (obraId, texto, inputEl) => {
     if (!texto.trim()) return;
-
-    if (!isLoggedIn) {
-      navigate("/login"); // 👈 si no está logeado, lo mandamos al login
-      return;
-    }
+    if (!isLoggedIn) { navigate("/login"); return; }
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/obras/${obraId}/comments`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // 👈 importante para la cookie
-          body: JSON.stringify({ texto }),
-        }
-      );
-
-      if (!response.ok) {
-        console.error("Error al agregar comentario:", response.status);
-        return;
-      }
+      const response = await fetch(`${API_BASE_URL}/api/obras/${obraId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ texto }),
+      });
+      if (!response.ok) return;
 
       const newComment = await response.json();
-      console.log(newComment);
 
-      // ✅ actualizar comentarios en selectedObra
-      setSelectedObra((prev) =>
-        prev
-          ? { ...prev, comentarios: [...(prev.comentarios || []), newComment] }
-          : prev
-      );
+      setSelectedObra(prev => prev ? { ...prev, comentarios: [...(prev.comentarios || []), newComment] } : prev);
 
-      // ✅ actualizar comentarios en allImages
-      setAllImages((prev) =>
-        prev.map((obra) =>
-          obra.id === obraId
-            ? { ...obra, comentarios: [...(obra.comentarios || []), newComment] }
-            : obra
-        )
-      );
+      setAllImages(prev => prev.map(obra =>
+        obra.id === obraId
+          ? { ...obra, comentarios: [...(obra.comentarios || []), newComment] }
+          : obra
+      ));
 
-      // ✅ limpiar el input
       if (inputEl) inputEl.value = "";
+
     } catch (error) {
-      console.error("Error en la petición:", error);
+      console.error(error);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="galeria-container">
-        <div className="empty">Cargando obras…</div>
-      </div>
-    );
-  }
+  if (loading) return <div className="galeria-container"><div className="empty">Cargando obras…</div></div>;
 
-  // función para obtener hasta 3 comentarios aleatorios
-  function getRandomComments(comentarios = [], max = 3) {
-    if (!Array.isArray(comentarios)) return [];
-    const shuffled = [...comentarios].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, max);
-  }
+
+  const handleCalification = async (obraId, valor) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/obras/${obraId}/calificacion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ valor })
+      });
+
+      if (!response.ok) throw new Error("Error al enviar la calificación");
+
+      // Actualizamos la calificación localmente
+      //const newRating = await response.json(); // si tu API devuelve el nuevo valor
+      setUserRating(valor);
+
+      // También podrías actualizar selectedObra.calificaciones para recalcular promedio
+      setSelectedObra(prev => prev ? { ...prev, calificaciones: [...(prev.calificaciones || []), { valor }] } : prev);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
 
   return (
     <div className="galeria-container">
+      <button
+        className="btn-regresar"
+        onClick={() => navigate("/")}
+      >
+        ← Menú Principal
+      </button>
       <div className="cards">
-        {allImages.map((obra) => (
-          <div
-            className="card"
-            key={obra.id}
-            onClick={() => setSelectedObra(obra)}
-          >
-            <img
-              src={obra.link_obra}
-              alt={`Obra ${obra.titulo || obra.id}`}
-
-            />
+        {allImages.map(obra => (
+          <div className="card" key={obra.id} onClick={() => setSelectedObra(obra)}>
+            <img src={obra.link_obra} alt={obra.titulo || obra.id} loading="lazy" />
 
             <div className="card-info">
               <h4 className="title">{obra.titulo || "Obra"}</h4>
               <p className="author">{obra.autor_name || "Autor desconocido"}</p>
+              <p className="rating">
+                ⭐ Calificación: {calcularPromedio(obra.calificaciones)}
+              </p>
+
+
             </div>
 
-            <div
-              className="actions"
-              onClick={(e) => e.stopPropagation()} // evita abrir modal si click en acciones
-            >
+            <div className="actions" onClick={e => e.stopPropagation()}>
               <button
-                className="circle-btn"
+                className={`circle-btn ${animatingLike === obra.id ? "anim-heart" : ""}`}
                 title="Me gusta"
                 onClick={() => handleLike(obra.id)}
-                disabled={obra.likes?.some(like => like.user_name === pseudonimo_user)}
               >
-                <Heart size={20}
-                  color={obra.likes?.some(like => like.user_name === pseudonimo_user) ? "red" : "gray"}
-                  fill={obra.likes?.some(like => like.user_name === pseudonimo_user) ? "red" : "none"}
+                <Heart
+                  size={20}
+                  color={obra.likes?.some(l => l.user_name === pseudonimo_user) ? "red" : "gray"}
+                  fill={obra.likes?.some(l => l.user_name === pseudonimo_user) ? "red" : "none"}
                 />
-                <span className="count">
-                  {Array.isArray(obra.likes) ? obra.likes.length : 0}
-                </span>
+                <span className="count">{Array.isArray(obra.likes) ? obra.likes.length : 0}</span>
               </button>
 
-              <button
-                className="circle-btn"
-                title="Comentar"
-              >
-                <MessageCircle size={20} />
-                <span className="count">
-                  {Array.isArray(obra.comentarios) ? obra.comentarios.length : 0}
-                </span>
+              <button className="circle-btn">
+                <MessageCircle
+                  size={20}
+                  fill={"blue"} />
+                <span className="count">{Array.isArray(obra.comentarios) ? obra.comentarios.length : 0}</span>
               </button>
             </div>
           </div>
         ))}
-
-        {allImages.length === 0 && (
-          <div className="empty">No hay obras para mostrar.</div>
-        )}
       </div>
 
-      <div className="arrow-down" aria-hidden></div>
-
-      {/* --- Modal de detalle --- */}
+      {/* Modal */}
       {selectedObra && (
         <div className="modal-overlay" onClick={() => setSelectedObra(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setSelectedObra(null)}>
-              <X size={24} />
-            </button>
-
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <button className="close-btn" onClick={() => setSelectedObra(null)}><X size={24} /></button>
             <div className="modal-content">
               <div className="modal-left">
-                <img
-                  src={selectedObra.link_obra}
-                  alt={selectedObra.titulo}
-                  className="modal-img"
-                />
+                <img src={selectedObra.link_obra} alt={selectedObra.titulo} className="modal-img" />
+                <p className="rating">
+                  ⭐{calcularPromedio(selectedObra?.calificaciones)}
+                </p>
+                <div className="star-rating">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className={`star ${(hoverRating || userRating) >= star ? 'filled' : ''}`}
+                      onClick={() => handleCalification(selectedObra.id, star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
               </div>
-
               <div className="modal-right">
                 <h2>{selectedObra.titulo}</h2>
                 <p className="author">{selectedObra.autor_name}</p>
                 <p className="desc">{selectedObra.descripcion}</p>
 
                 <div className="modal-actions">
-                  <button
-                    className="circle-btn"
-                    onClick={() => handleLike(selectedObra.id)}
-                    disabled={selectedObra.likes?.some(like => like.user_name === pseudonimo_user)}
-                  >
-                    <Heart size={20}
-                      color={selectedObra.likes?.some(like => like.user_name === pseudonimo_user) ? "red" : "gray"}
-                      fill={selectedObra.likes?.some(like => like.user_name === pseudonimo_user) ? "red" : "none"}
-                    />
-                    <span className="count">
-                      {Array.isArray(selectedObra.likes)
-                        ? selectedObra.likes.length
-                        : 0}
-                    </span>
+
+                  <button className={`circle-btn ${animatingLike === selectedObra.id ? "anim-heart" : ""}`} onClick={() => handleLike(selectedObra.id)}>
+                    <Heart size={20} color={selectedObra.likes?.some(l => l.user_name === pseudonimo_user) ? "red" : "gray"} fill={selectedObra.likes?.some(l => l.user_name === pseudonimo_user) ? "red" : "none"} />
+                    <span className="count">{Array.isArray(selectedObra.likes) ? selectedObra.likes.length : 0}</span>
                   </button>
-                  <button className="circle-btn">
-                    <MessageCircle size={20} />
-                    <span className="count">
-                      {Array.isArray(selectedObra.comentarios)
-                        ? selectedObra.comentarios.length
-                        : 0}
-                    </span>
-                    
-                  </button>
+
                 </div>
 
-                {/* solo 3 comentarios random */}
-                <div className="comments-list">
-                  {getRandomComments(selectedObra.comentarios).map((c, idx) => (
+                {/* Scroll de comentarios completo */}
+                <div className="comments-list scroll">
+                  {selectedObra.comentarios?.map((c, idx) => (
                     <div key={idx} className="comment">
-                      <strong>{c.nameUser || "Usuario"}:</strong>{" "}
-                      {c.texto || c}
+                      <strong>{c.nameUser || "Usuario"}:</strong> {c.texto || c}
                     </div>
                   ))}
                 </div>
 
-                {/* caja comentario */}
                 <div className="comment-box">
                   <input
                     type="text"
                     placeholder="Añade un comentario..."
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleComment(
-                          selectedObra.id,
-                          e.target.value,
-                          e.target
-                        );
-                      }
+                    onKeyDown={e => {
+                      if (e.key === "Enter") handleComment(selectedObra.id, e.target.value, e.target);
                     }}
                   />
                   <MessageCircle
                     size={20}
                     className="send-btn"
                     onClick={() => {
-                      const input = document.querySelector(
-                        ".comment-box input"
-                      );
-                      if (input) {
-                        handleComment(selectedObra.id, input.value, input);
-                      }
+                      const input = document.querySelector(".comment-box input");
+                      if (input) handleComment(selectedObra.id, input.value, input);
                     }}
                   />
                 </div>
@@ -286,7 +259,6 @@ export default function GaleriaObras() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

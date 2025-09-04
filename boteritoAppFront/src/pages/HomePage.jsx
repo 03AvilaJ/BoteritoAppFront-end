@@ -1,4 +1,4 @@
-import { Menu, User, Filter, Image, Plus, LogIn } from 'lucide-react';
+import { Menu, User, Filter, Image, Plus, LogIn, ArrowDownCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
@@ -6,7 +6,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const API_BASE_URL = "http://localhost:8080"
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const HomePage = () => {
 
@@ -154,13 +154,13 @@ const HomePage = () => {
           <aside className="sidebar" onClick={(e) => e.stopPropagation()}>
             <ul>
               <li onClick={() => {
-                  closeMenu();
-                  if (!isLoggedIn) {
-                    navigate("/login", { state: { from: "/registrar" } });
-                  } else {
-                    navigate("/perfil");
-                  }
-                }}><User size={20} /> <span>Perfil</span></li>
+                closeMenu();
+                if (!isLoggedIn) {
+                  navigate("/login", { state: { from: "/registrar" } });
+                } else {
+                  navigate("/perfil");
+                }
+              }}><User size={20} /> <span>Perfil</span></li>
               <li onClick={() => setShowFilterOptions(!showFilterOptions)}>
                 <Filter size={20} /> <span>Filtros</span>
               </li>
@@ -201,7 +201,6 @@ const HomePage = () => {
               )}
               <li onClick={closeMenu}><Image size={20} /> <span>Galería</span></li>
 
-              {/* 🔹 NUEVO BOTÓN: Registrar usuario */}
               <li
                 onClick={() => {
                   closeMenu();
@@ -261,9 +260,11 @@ const HomePage = () => {
                 icon={customIcon}
               >
                 <Popup>
-                  <strong>{obra.titulo || "Obra"}</strong><br />
-                  {obra.descripcion || "Sin descripción"}<br />
-                  <img src={obra.link_obra} alt="obra" style={{ width: "100px" }} />
+                  <div className="popup-content">
+                    <strong>{obra.titulo || "Obra"}</strong><br />
+                    {obra.descripcion || "Sin descripción"}<br />
+                    <img src={obra.link_obra} alt="obra" style={{ width: "150px", borderRadius: "8px", marginTop: "5px" }} />
+                  </div>
                 </Popup>
               </Marker>
             )
@@ -288,13 +289,16 @@ const HomePage = () => {
             ))}
           </div>
 
-          {/* 👇 Botón centrado encima del carrusel */}
-          <button
-            onClick={() => navigate("/galeria")}
-            className="btn-ver-galeria px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition"
-          >
-            Ver Galería
-          </button>
+          {/* Botón centrado debajo del carrusel */}
+          <div className="ver-galeria-container">
+            <button
+              onClick={() => navigate("/galeria")}
+              className="btn-ver-galeria"
+            >
+              <ArrowDownCircle size={36} />
+            </button>
+          </div>
+
         </div>
 
 

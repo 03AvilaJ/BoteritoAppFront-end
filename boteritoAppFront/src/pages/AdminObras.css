@@ -6,7 +6,7 @@
 }
 
 /* ====== Navbar ====== */
-.navbar {
+.admin-container .navbar {
   background: #2c3e50;
   color: white;
   padding: 10px 20px;
@@ -14,29 +14,29 @@
   align-items: center;
 }
 
-.navbar .left-section {
+.admin-container.navbar .left-section {
   display: flex;
   align-items: center;
 }
 
-.navbar .menu-icon {
+.admin-container .navbar .menu-icon {
   cursor: pointer;
   margin-right: 15px;
 }
 
-.navbar nav ul {
+.admin-container .navbar nav ul {
   list-style: none;
   display: flex;
   margin: 0;
   padding: 0;
 }
 
-.navbar nav ul li {
+.admin-container .navbar nav ul li {
   margin-right: 15px;
   cursor: pointer;
 }
 
-.navbar nav ul li.active {
+.admin-container .navbar nav ul li.active {
   font-weight: bold;
   text-decoration: underline;
 }

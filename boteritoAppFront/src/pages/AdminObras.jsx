@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Menu, CheckCircle, XCircle, BookOpen, Edit3 } from "lucide-react";
 import "./AdminObras.css";
 
-const API_BASE_URL = "http://localhost:8080"
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function AdminObras() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

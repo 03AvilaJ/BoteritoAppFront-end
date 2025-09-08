@@ -6,6 +6,8 @@ import L from "leaflet";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+
+
 // Ícono para el marcador
 const markerIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7/dist/images/marker-icon.png",
@@ -30,6 +32,8 @@ const RegistrarObra = () => {
     titulo: '',
     autor_name: '',
     tecnica: '',
+    psuedonimo: '',
+    fecha_registro: '',
     fecha: '',
     descripcion: '',
     imagen: null,
@@ -111,12 +115,23 @@ const RegistrarObra = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(localStorage.getItem("pseudonimo"))
     try {
+
+      // Obtener id usuario (ejemplo si lo guardaste en localStorage)
+    const userId = localStorage.getItem("pseudonimo"); 
+    
+
+    // Fecha local del sistema (ISO string recortada)
+    const fechaLocal = new Date().toISOString().slice(0, 19); 
       const formData = new FormData();
       if (obra.imagen) {
         formData.append("imagen", obra.imagen);
       }
-      const obraData = { ...obra };
+      const obraData = { ...obra, 
+      pseudonimo: userId,
+      fecha_registro: fechaLocal };
+      console.log(obraData)
       delete obraData.imagen;
       formData.append("obra", new Blob([JSON.stringify(obraData)], { type: "application/json" }));
 
@@ -135,6 +150,8 @@ const RegistrarObra = () => {
       setObra({
         titulo: '',
         autor_name: '',
+        psuedonimo: '',
+        fecha_registro: '',
         tecnica: '',
         fecha: '',
         descripcion: '',

@@ -1,3 +1,7 @@
+/* =======================
+   AdminObras.css (limpio)
+   ======================= */
+
 /* ====== Contenedor general ====== */
 .admin-container {
   font-family: Arial, sans-serif;
@@ -6,15 +10,19 @@
 }
 
 /* ====== Navbar ====== */
+/* Nota: position + z-index para controlar stacking */
 .admin-container .navbar {
   background: #2c3e50;
   color: white;
   padding: 10px 20px;
   display: flex;
   align-items: center;
+  position: relative; /* importante para z-index */
+  z-index: 1;      /* más bajo que el modal */
 }
 
-.admin-container.navbar .left-section {
+/* corrección del selector (antes estaba mal escrito) */
+.admin-container .navbar .left-section {
   display: flex;
   align-items: center;
 }
@@ -41,15 +49,13 @@
   text-decoration: underline;
 }
 
-/* ====== Sidebar ====== */
+/* ====== Sidebar (overlay del menú) ====== */
 .menu-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
+  inset: 0;
+  background: rgba(0,0,0,0.45);
   display: flex;
+  z-index: 1500; /* por debajo del modal overlay */
 }
 
 .sidebar {
@@ -143,293 +149,188 @@
 
 .status-aprobado {
   background: #d4edda;
-  color: #155724;
+  color: #27b548;
   border: 1px solid #c3e6cb;
 }
 
 .status-pendiente {
   background: #fff3cd;
-  color: #856404;
+  color: #a07b0c;
   border: 1px solid #ffeeba;
 }
 
-/* ====== Botones ====== */
-.edit-btn,
-.save-btn,
-.cancel-btn {
-  margin: 2px;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.edit-btn {
-  background-color: #007bff;
-  color: white;
-}
-
-.edit-btn:hover {
-  background-color: #0056b3;
-}
-
-.save-btn {
-  background-color: #28a745;
-  color: white;
-}
-
-.save-btn:hover {
-  background-color: #218838;
-}
-
-.cancel-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.cancel-btn:hover {
-  background-color: #c82333;
-}
-
-/* ====== Modal ====== */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
+/* ====== Iconos / botones de acción en la tabla ====== */
+/* Contenedor */
+.acciones {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.modal {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-
-.modal h2 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 20px;
-  color: #333;
-}
-
-.modal-form .form-group {
-  margin-bottom: 12px;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-form label {
-  font-weight: bold;
-  margin-bottom: 5px;
-  font-size: 13px;
-  color: #444;
-}
-
-.modal-form input {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 15px;
-}
-/* Overlay oscuro del modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
+  gap: 8px;
   justify-content: center;
   align-items: center;
-  z-index: 999;
 }
 
-/* Contenedor del modal */
-.modal {
-  background: #fff;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 900px;
-  padding: 24px;
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.25);
-  animation: slideDown 0.3s ease;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-/* Animación suave */
-@keyframes slideDown {
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-/* Título modal */
-.modal h3 {
-  margin-bottom: 20px;
-  text-align: center;
-  color: #333;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-/* Grid para los campos */
-.modal-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-/* Cada grupo de campo */
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #444;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 10px 12px;
+/* Estilo común para iconos (usado en tus <Edit3 className="icon-btn edit" /> ) */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  transition: border 0.2s;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: #007bff;
+/* hover y focus accesible */
+.icon-btn:hover,
+.icon-btn:focus {
+  transform: translateY(-2px);
+  background: rgba(0,0,0,0.04);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   outline: none;
 }
 
-/* Área de botones dentro del modal */
-.modal-actions {
-  margin-top: 24px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
+/* colores por acción (aplica al SVG del icono mediante color) */
+.icon-btn.edit { color: #0d6efd; }     /* azul */
+.icon-btn.accept { color: #28a745; }   /* verde */
+.icon-btn.reject { color: #dc3545; }   /* rojo */
 
-.save-btn {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s;
-}
-
-.save-btn:hover {
-  background: #218838;
-}
-
-.cancel-btn {
-  background: #dc3545;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s;
-}
-
-.cancel-btn:hover {
-  background: #c82333;
-}
-
-/* Botones de acciones en tabla */
+/* fallback para botones tipo texto en tabla (si los usas) */
 .action-btn {
   background: none;
   border: none;
   cursor: pointer;
   margin: 0 4px;
-  font-size: 18px;
+  font-size: 16px;
   padding: 6px;
   border-radius: 6px;
-  transition: background 0.2s;
+  transition: background 0.12s;
 }
 
-.action-btn.edit {
-  color: #007bff;
+.action-btn:hover { background: rgba(0,0,0,0.04); }
+
+/* ====== Modal (único bloque, sin duplicados) ====== */
+/* overlay: arriba de todo */
+.modal-overlay {
+  position: fixed;
+  inset: 0; /* top/right/bottom/left: 0 */
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999; /* MUY ARRIBA para evitar problemas con navbar */
 }
 
-.action-btn.accept {
-  color: #28a745;
-}
-
-.action-btn.reject {
-  color: #dc3545;
-}
-
-.action-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-/* Estado de registro */
-.status-registrado {
-  background: #e2e3e5;
-  color: #444;
-  padding: 4px 10px;
+/* modal container */
+.modal {
+  position: relative;
+  z-index: 100000;
+  background: #fff;
   border-radius: 12px;
+  width: min(900px, 94%);
+  padding: 22px 24px;
+  box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.28);
+  animation: slideDown 0.28s ease;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+/* animación */
+@keyframes slideDown {
+  from { transform: translateY(-16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal h2 {
+  margin-top: 0;
+  margin-bottom: 14px;
+  font-size: 20px;
+  color: #222;
+  text-align: left;
+}
+
+/* Grid para los campos del modal */
+.modal-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Form groups */
+.form-group { display: flex; flex-direction: column; }
+.form-group label {
   font-size: 13px;
   font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  transition: border-color .16s ease, box-shadow .12s ease;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 4px rgba(13,110,253,0.06);
+  outline: none;
 }
 
-.status-validado {
-  background: #d4edda;
-  color: #155724;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.status-rechazado {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Responsivo */
+/* Responsivo modal form */
 @media (max-width: 768px) {
-  .modal-form {
-    grid-template-columns: 1fr;
-  }
+  .modal-form { grid-template-columns: 1fr; }
 }
+
+/* ====== Botones del modal ====== */
+.modal-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Botón Guardar (save-btn) */
+.save-btn {
+  background: linear-gradient(135deg,#28a745,#218838);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(33,136,56,0.18);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s;
+}
+.save-btn:hover { transform: translateY(-2px); filter: brightness(.98); }
+
+/* Botón Cancelar (cancel-btn) */
+.cancel-btn {
+  background: linear-gradient(135deg,#f46b6b,#d63d3d);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(214,61,61,0.12);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s;
+}
+.cancel-btn:hover { transform: translateY(-2px); filter: brightness(.98); }
+
+/* accesibilidad: foco visible */
+.save-btn:focus, .cancel-btn:focus, .icon-btn:focus, .action-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(13,110,253,0.12);
+}
+
+/* ====== Estado de registro (alternativas) ====== */
+.status-registrado { background: #e2e3e5; color: #444; padding: 6px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+.status-validado   { background: #d4edda; color: #09ff42; padding: 6px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+.status-rechazado  { background: #f8d7da; color: #ff0019; padding: 6px 10px; border-radius: 12px; font-size: 60px; font-weight: 600; }

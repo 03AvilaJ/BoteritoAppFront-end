@@ -6,6 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const Perfil = () => {
   const navigate = useNavigate();
+  const [obrasUsuario, setObrasUsuario] = useState([]);
   const [formData, setFormData] = useState({
     nombre: "",
     fecha_nacimiento: "",
@@ -40,6 +41,23 @@ const Perfil = () => {
     };
 
     fetchPerfil();
+  }, []);
+
+  useEffect(() => {
+    const fetchObrasUsuario = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/obras/listaObrasUsuario`, {
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error("Error al obtener obras del usuario");
+        const data = await res.json();
+        setObrasUsuario(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchObrasUsuario();
   }, []);
 
   // 🔹 Cambios en los inputs
@@ -149,6 +167,80 @@ const Perfil = () => {
             </div>
           </form>
         </div>
+
+        <div className="mis-obras-container">
+          <h2>Mis Obras</h2>
+          <div className="table-container">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Imagen</th>
+                  <th>Título</th>
+                  <th>Autor</th>
+                  <th>Fecha</th>
+                  <th>Técnica</th>
+                  <th>Tipo Mural</th>
+                  <th>Conservación</th>
+                  <th>Altura</th>
+                  <th>Anchura</th>
+                  <th>Descripción</th>
+                  <th>Superficie</th>
+                  <th>Mensaje</th>
+                  <th>Ubicación</th>
+                  <th>Estado de resgistro</th>
+                </tr>
+              </thead>
+              <tbody>
+                {obrasUsuario.length === 0 ? (
+                  <tr>
+                    <td colSpan="13" style={{ textAlign: "center" }}>
+                      No tienes obras registradas.
+                    </td>
+                  </tr>
+                ) : (
+                  obrasUsuario.map((obra, i) => (
+                    <tr key={i}>
+                      <td>
+                        {obra.link_obra ? (
+                          <img
+                            src={obra.link_obra}
+                            alt={obra.titulo}
+                            style={{ width: "80px", borderRadius: "6px" }}
+                          />
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td>{obra.titulo}</td>
+                      <td>{obra.autor_name}</td>
+                      <td>{obra.fechaCreacion}</td>
+                      <td>{obra.tecnica?.tecnica || "—"}</td>
+                      <td>{obra.tipo?.tipo_mural || "—"}</td>
+                      <td>{obra.estadoConservacion?.estado || "—"}</td>
+                      <td>{obra.alto}</td>
+                      <td>{obra.ancho}</td>
+                      <td>{obra.descripcion}</td>
+                      <td>{obra.surface?.superficie || "—"}</td>
+                      <td>{obra.mensaje}</td>
+                      <td>{obra.ubicacion?.direccion || "—"}</td>
+                      <span
+                        className={`status ${obra.registeredStatus?.estado_registro === "validado"
+                          ? "status-aprobado"
+                          : obra.registeredStatus?.estado_registro === "rechazado"
+                            ? "status-rechazado"
+                            : "status-pendiente"
+                          }`}
+                      >
+                        {obra.registeredStatus?.estado_registro}
+                      </span>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </main>
     </div>
   );

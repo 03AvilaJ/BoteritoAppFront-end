@@ -6,6 +6,7 @@
 
 /* Sidebar */
 .sidebar {
+  flex-shrink: 0;           /* evita que se achique */
   width: 220px;
   background-color: #f9f9f9;
   border-right: 1px solid #ddd;
@@ -62,24 +63,6 @@
   background-color: #e63e3e;
 }
 
-/* Contenido principal */
-.perfil-content {
-  flex: 1;
-  background-color: #fdfdfd;
-  padding: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.form-box {
-  background: #f7f7f7;
-  padding: 25px;
-  border-radius: 10px;
-  width: 100%;
-  max-width: 700px;
-  position: relative;
-}
 
 .edit-btn {
   position: absolute;
@@ -124,4 +107,58 @@
 
 .save-btn:hover {
   background-color: #054c17;
+}
+
+/* Contenedor principal */
+.perfil-content {
+  flex: 1;
+  background-color: #fdfdfd;
+  padding: 40px;
+  display: flex;
+  flex-direction: column; /* perfil arriba, obras abajo */
+  gap: 40px; /* espacio entre perfil y tabla */
+}
+
+/* Caja de perfil */
+.form-box {
+  position: relative;  /* 🔹 asegura que el edit-btn no rompa el layout */
+  background: #f7f7f7;
+  padding: 25px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 700px;
+}
+
+/* Caja de mis obras */
+.mis-obras-container {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  width: 100%;
+  overflow-x: auto;   /* 🔹 si la tabla es ancha, aparece scroll horizontal */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.mis-obras-container h2 {
+  margin-bottom: 15px;
+}
+
+.table-container {
+  width: 100%;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.admin-table th {
+  background-color: #f0f0f0;
 }

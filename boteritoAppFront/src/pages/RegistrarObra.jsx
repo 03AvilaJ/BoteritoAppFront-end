@@ -4,9 +4,11 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
+// 👉 importamos react-toastify
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-
 
 // Ícono para el marcador
 const markerIcon = new L.Icon({
@@ -59,23 +61,22 @@ const RegistrarObra = () => {
 
   // Cuando cambia el marcador, actualizar en obra
   useEffect(() => {
-  setObra((prev) => ({
-    ...prev,
-    lat: latlng.lat,
-    lng: latlng.lng,
-  }));
-}, [latlng]);
-
+    setObra((prev) => ({
+      ...prev,
+      lat: latlng.lat,
+      lng: latlng.lng,
+    }));
+  }, [latlng]);
 
   useEffect(() => {
     const fetchCatalogos = async () => {
       try {
         const [resTecnicas, resTipos, resConservacion, resSuperficies] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/tecnicas`, { credentials: "include" }),
-        fetch(`${API_BASE_URL}/api/tipos`, { credentials: "include" }),
-        fetch(`${API_BASE_URL}/api/conservacion`, { credentials: "include" }),
-        fetch(`${API_BASE_URL}/api/superficies`, { credentials: "include" }),
-      ]);
+          fetch(`${API_BASE_URL}/api/tecnicas`, { credentials: "include" }),
+          fetch(`${API_BASE_URL}/api/tipos`, { credentials: "include" }),
+          fetch(`${API_BASE_URL}/api/conservacion`, { credentials: "include" }),
+          fetch(`${API_BASE_URL}/api/superficies`, { credentials: "include" }),
+        ]);
 
         if (!resTecnicas.ok || !resTipos.ok || !resConservacion.ok || !resSuperficies.ok) {
           throw new Error("Error al obtener catálogos del backend");
@@ -87,6 +88,7 @@ const RegistrarObra = () => {
         setSuperficiesMural(await resSuperficies.json());
       } catch (error) {
         console.error("Error al cargar catálogos:", error);
+        toast.error("❌ No se pudieron cargar los catálogos");
       }
     };
 
@@ -109,29 +111,25 @@ const RegistrarObra = () => {
         setLatLng({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       });
     } else {
-      alert("La geolocalización no es soportada por este navegador.");
+      toast.warning("⚠️ La geolocalización no es soportada por este navegador.");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(localStorage.getItem("pseudonimo"))
     try {
+      const userId = localStorage.getItem("pseudonimo");
+      const fechaLocal = new Date().toISOString().slice(0, 19);
 
-      // Obtener id usuario (ejemplo si lo guardaste en localStorage)
-    const userId = localStorage.getItem("pseudonimo"); 
-    
-
-    // Fecha local del sistema (ISO string recortada)
-    const fechaLocal = new Date().toISOString().slice(0, 19); 
       const formData = new FormData();
       if (obra.imagen) {
         formData.append("imagen", obra.imagen);
       }
-      const obraData = { ...obra, 
-      pseudonimo: userId,
-      fecha_registro: fechaLocal };
-      console.log(obraData)
+      const obraData = {
+        ...obra,
+        pseudonimo: userId,
+        fecha_registro: fechaLocal
+      };
       delete obraData.imagen;
       formData.append("obra", new Blob([JSON.stringify(obraData)], { type: "application/json" }));
 
@@ -143,10 +141,7 @@ const RegistrarObra = () => {
 
       if (!response.ok) throw new Error("Error al registrar la obra");
 
-      const data = await response.json();
-      console.log("✅ Obra creada:", data);
-
-      alert("Obra registrada correctamente.");
+      toast.success("✅ Obra registrada correctamente");
       setObra({
         titulo: '',
         autor_name: '',
@@ -169,9 +164,28 @@ const RegistrarObra = () => {
       });
       setStep(1);
     } catch (error) {
-      console.error("❌ Error:", error);
-      alert("Hubo un problema al registrar la obra");
+      toast.error("❌ Hubo un error al registrar la obra");
     }
+  };
+
+  const validateStep = (step) => {
+    if (step === 1) {
+      return obra.titulo.trim() !== "" &&
+        obra.autor_name.trim() !== "" &&
+        obra.tecnica.trim() !== "" &&
+        obra.fecha.trim() !== "" &&
+        obra.descripcion.trim() !== "" &&
+        obra.imagen !== null;
+    }
+    if (step === 2) {
+      return obra.tipoMural.trim() !== "" &&
+        obra.estadoConservacionId.trim() !== "" &&
+        obra.superficieId.trim() !== "";
+    }
+    if (step === 3) {
+      return obra.lat !== "" && obra.lng !== "";
+    }
+    return true;
   };
 
   return (
@@ -187,7 +201,6 @@ const RegistrarObra = () => {
         <form onSubmit={handleSubmit}>
           {step === 1 && (
             <>
-              {/* paso 1 */}
               <input type="text" name="titulo" placeholder="Título" value={obra.titulo} onChange={handleChange} required />
               <input type="text" name="autor_name" placeholder="Autor" value={obra.autor_name} onChange={handleChange} required />
 
@@ -209,13 +222,18 @@ const RegistrarObra = () => {
               </label>
               {obra.imagen && <p className="file-info">📸 Imagen lista: {obra.imagen.name}</p>}
 
-              <button type="button" onClick={() => setStep(2)}>Siguiente</button>
+              <button type="button" onClick={() => {
+                if (validateStep(1)) {
+                  setStep(2);
+                } else {
+                  toast.warning("⚠️ Completa todos los campos del paso 1 antes de continuar.");
+                }
+              }}>Siguiente</button>
             </>
           )}
 
           {step === 2 && (
             <>
-              {/* paso 2 */}
               <input type="text" name="alto" placeholder="Alto" value={obra.alto} onChange={handleChange} />
               <input type="text" name="ancho" placeholder="Ancho" value={obra.ancho} onChange={handleChange} />
               <textarea name="mensajeObra" placeholder="Mensaje de la obra" value={obra.mensajeObra} onChange={handleChange} />
@@ -243,14 +261,19 @@ const RegistrarObra = () => {
 
               <div className="button-group">
                 <button type="button" onClick={() => setStep(1)}>Anterior</button>
-                <button type="button" onClick={() => setStep(3)}>Siguiente</button>
+                <button type="button" onClick={() => {
+                  if (validateStep(2)) {
+                    setStep(3);
+                  } else {
+                    toast.warning("⚠️ Completa todos los campos del paso 2 antes de continuar.");
+                  }
+                }}>Siguiente</button>
               </div>
             </>
           )}
 
           {step === 3 && (
             <>
-              {/* paso 3 con mapa */}
               <MapContainer center={[5.5353, -73.3678]} zoom={14}>
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
@@ -279,6 +302,9 @@ const RegistrarObra = () => {
           )}
         </form>
       </div>
+
+      {/* 👉 contenedor de Toastify */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

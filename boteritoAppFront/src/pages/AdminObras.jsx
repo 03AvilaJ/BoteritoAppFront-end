@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, CheckCircle, XCircle, BookOpen, Edit3 } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import "./AdminObras.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -8,10 +9,10 @@ export default function AdminObras() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [obras, setObras] = useState([]);
-
+  const navigate = useNavigate();
   const [modalAbierto, setModalAbierto] = useState(false);
   const [estado_registro, setEstadoRegistro] = useState(null);
-
+  const [filtroEstado, setFiltroEstado] = useState("TODOS");
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
@@ -94,29 +95,29 @@ export default function AdminObras() {
   // 🔹 Guardar cambios en modal (sin cambiar estado)
   async function actualizarObra(obraData) {
     const payload = {
-  id: obraData.id,
-  titulo: obraData.titulo,
-  fechaCreacion: obraData.fechaCreacion,
-  descripcion: obraData.descripcion,
-  mensaje: obraData.mensaje,
-  tecnicaId: obraData.tecnica?.id || null,
-  tipoMuralId: obraData.tipo?.id || null,
-  ilustracionId: obraData.ilustracion?.id || null,
-  superficieId: obraData.surface?.id || null,
-  estadoConservacionId: obraData.estadoConservacion?.id || null,
-  ubicacionId: obraData.ubicacion?.id || null,
-  ancho: obraData.ancho,
-  alto: obraData.alto,
-  observaciones: obraData.observaciones,
-  autor_name: obraData.autor_name,
-  tipografiasId: obraData.typography?.id || null,
-  contexto_historico: obraData.contexto_historico,
-  restaurador: obraData.restaurador,
-  estadoRegistradoId: obraData.registeredStatus?.id || null,
-  id_usuario_carga: obraData.owner_user?.id || obraData.id_usuario_carga,
-  fecha_registro: obraData.fecha_registro,
-  link_obra: obraData.link_obra,
-};
+      id: obraData.id,
+      titulo: obraData.titulo,
+      fechaCreacion: obraData.fechaCreacion,
+      descripcion: obraData.descripcion,
+      mensaje: obraData.mensaje,
+      tecnicaId: obraData.tecnica?.id || null,
+      tipoMuralId: obraData.tipo?.id || null,
+      ilustracionId: obraData.ilustracion?.id || null,
+      superficieId: obraData.surface?.id || null,
+      estadoConservacionId: obraData.estadoConservacion?.id || null,
+      ubicacionId: obraData.ubicacion?.id || null,
+      ancho: obraData.ancho,
+      alto: obraData.alto,
+      observaciones: obraData.observaciones,
+      autor_name: obraData.autor_name,
+      tipografiasId: obraData.typography?.id || null,
+      contexto_historico: obraData.contexto_historico,
+      restaurador: obraData.restaurador,
+      estadoRegistradoId: obraData.registeredStatus?.id || null,
+      id_usuario_carga: obraData.owner_user?.id || obraData.id_usuario_carga,
+      fecha_registro: obraData.fecha_registro,
+      link_obra: obraData.link_obra,
+    };
 
     try {
       console.log(payload)
@@ -177,9 +178,13 @@ export default function AdminObras() {
   };
 
 
-  const obrasFiltradas = obras.filter((obra) =>
-    obra.titulo.toLowerCase().includes(search.toLowerCase())
-  );
+  const obrasFiltradas = obras.filter((obra) => {
+    const coincideBusqueda = obra.titulo?.toLowerCase().includes(search.toLowerCase());
+    const coincideEstado =
+      filtroEstado === "TODOS" || obra.registeredStatus?.estado_registro === filtroEstado;
+
+    return coincideBusqueda && coincideEstado;
+  });
 
   return (
     <div className="admin-container">
@@ -200,16 +205,20 @@ export default function AdminObras() {
         <div className="menu-overlay" onClick={closeMenu}>
           <aside className="sidebar" onClick={(e) => e.stopPropagation()}>
             <ul>
-              <li onClick={closeMenu}>
+              <li onClick={() => { setFiltroEstado("registrado"); closeMenu(); }}>
                 <BookOpen size={20} /> <span>Obras Registradas</span>
               </li>
-              <li onClick={closeMenu}>
+              <li onClick={() => { setFiltroEstado("validado"); closeMenu(); }}>
                 <CheckCircle size={20} /> <span>Obras Validadas</span>
               </li>
-              <li onClick={closeMenu}>
+              <li onClick={() => { setFiltroEstado("rechazado"); closeMenu(); }}>
                 <XCircle size={20} /> <span>Obras Rechazadas</span>
               </li>
+              <li onClick={() => navigate("/admin/usuarios")}>
+                <XCircle size={20} /> <span>Administrar Usuarios</span>
+              </li>
             </ul>
+
           </aside>
         </div>
       )}

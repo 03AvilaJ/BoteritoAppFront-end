@@ -111,6 +111,11 @@ export default function Login() {
           No tienes una cuenta? <a href="/RegistrarUsuario">Regístrate</a>
         </p>
 
+        <p className="forgot-password">
+          ¿Olvidaste tu contraseña? <a href="/forgot-password">Recupérala aquí</a>
+        </p>
+
+
         <div className="btn-google">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}

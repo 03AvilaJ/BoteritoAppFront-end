@@ -89,13 +89,49 @@ const Perfil = () => {
     }
   };
 
+  const handleUpdate = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/usuarios/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // 🔹 manda la cookie con el JWT
+        body: JSON.stringify({ biografia: formData.biografia }), // 🔹 manda los datos editados
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al actualizar perfil");
+      }
+
+      const updatedUser = await response.json();
+      console.log("Perfil actualizado:", updatedUser);
+
+      // Actualiza el formData con lo que responde el backend
+      setFormData({
+        nombre: updatedUser.nombre || "",
+        fechaNacimiento: updatedUser.fechaNacimiento || "",
+        pseudonimo: updatedUser.pseudonimo || "",
+        email: updatedUser.email || "",
+        biografia: updatedUser.biografia || "",
+        role: updatedUser.role?.rol || "",
+      });
+
+      alert("Perfil actualizado con éxito ✅");
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo actualizar el perfil ❌");
+    }
+  };
+
+
   return (
     <div className="perfil-container">
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="logo">🎨</div>
-          <p className="description">Title <br /> Description</p>
+          <p className="description">PERFIL <br /> </p>
         </div>
         <nav className="menu">
           <a onClick={() => navigate("/")}>Inicio</a>
@@ -116,7 +152,7 @@ const Perfil = () => {
                   type="text"
                   name="nombre"
                   value={formData.nombre}
-                  onChange={handleChange}
+                  readOnly
                 />
               </div>
               <div>
@@ -125,7 +161,7 @@ const Perfil = () => {
                   type="date"
                   name="fechaNacimiento"
                   value={formData.fechaNacimiento}
-                  onChange={handleChange}
+                  readOnly
                 />
               </div>
               <div>
@@ -134,7 +170,7 @@ const Perfil = () => {
                   type="text"
                   name="pseudonimo"
                   value={formData.pseudonimo}
-                  onChange={handleChange}
+                  readOnly
                 />
               </div>
               <div>
@@ -143,7 +179,7 @@ const Perfil = () => {
                   type="text"
                   name="email"
                   value={formData.email}
-                  onChange={handleChange}
+                  readOnly
                 />
               </div>
               <div>
@@ -161,10 +197,14 @@ const Perfil = () => {
                   type="text"
                   name="role"
                   value={formData.role}
-                  onChange={handleChange}
+                  readOnly
                 />
               </div>
             </div>
+            <button type="button" className="save-btn" onClick={handleUpdate}>
+              Guardar Cambios
+            </button>
+
           </form>
         </div>
 
@@ -177,15 +217,7 @@ const Perfil = () => {
                   <th>Imagen</th>
                   <th>Título</th>
                   <th>Autor</th>
-                  <th>Fecha</th>
-                  <th>Técnica</th>
-                  <th>Tipo Mural</th>
-                  <th>Conservación</th>
-                  <th>Altura</th>
-                  <th>Anchura</th>
-                  <th>Descripción</th>
-                  <th>Superficie</th>
-                  <th>Mensaje</th>
+                  <th>Fecha Registro</th>
                   <th>Ubicación</th>
                   <th>Estado de resgistro</th>
                 </tr>
@@ -213,26 +245,20 @@ const Perfil = () => {
                       </td>
                       <td>{obra.titulo}</td>
                       <td>{obra.autor_name}</td>
-                      <td>{obra.fechaCreacion}</td>
-                      <td>{obra.tecnica?.tecnica || "—"}</td>
-                      <td>{obra.tipo?.tipo_mural || "—"}</td>
-                      <td>{obra.estadoConservacion?.estado || "—"}</td>
-                      <td>{obra.alto}</td>
-                      <td>{obra.ancho}</td>
-                      <td>{obra.descripcion}</td>
-                      <td>{obra.surface?.superficie || "—"}</td>
-                      <td>{obra.mensaje}</td>
+                      <td>{obra.fecha_registro}</td>
                       <td>{obra.ubicacion?.direccion || "—"}</td>
-                      <span
-                        className={`status ${obra.registeredStatus?.estado_registro === "validado"
-                          ? "status-aprobado"
-                          : obra.registeredStatus?.estado_registro === "rechazado"
-                            ? "status-rechazado"
-                            : "status-pendiente"
-                          }`}
-                      >
-                        {obra.registeredStatus?.estado_registro}
-                      </span>
+                      <td>
+                        <span
+                          className={`status ${obra.registeredStatus?.estado_registro === "validado"
+                            ? "status-aprobado"
+                            : obra.registeredStatus?.estado_registro === "rechazado"
+                              ? "status-rechazado"
+                              : "status-pendiente"
+                            }`}
+                        >
+                          {obra.registeredStatus?.estado_registro}
+                        </span>
+                      </td>
                     </tr>
                   ))
                 )}

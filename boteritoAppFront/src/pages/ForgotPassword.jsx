@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // 👈 importar el hook
 import "./ForgotPassword.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -25,9 +27,11 @@ export default function ForgotPassword() {
       if (res.ok) {
         setTimeout(() => {
           navigate("/"); 
-        }, 2000); // espera 2 segundos para mostrar el mensaje antes de redirigir
+        }, 2000);
+        toast.success("✅ Operación realizada correctamente"); // espera 2 segundos para mostrar el mensaje antes de redirigir
       }
     } catch (error) {
+      toast.error("❌ Error al enviar el correo de recuperación.");
       setMessage("❌ Error al enviar el correo de recuperación.");
     }
   };
@@ -46,6 +50,7 @@ export default function ForgotPassword() {
         <button type="submit">Enviar enlace</button>
       </form>
       {message && <p className="message">{message}</p>}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

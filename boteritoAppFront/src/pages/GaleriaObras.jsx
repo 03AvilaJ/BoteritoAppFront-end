@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { Heart, MessageCircle, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "./GaleriaObras.css";
+import * as leoProfanity from "leo-profanity";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -12,17 +15,29 @@ export default function GaleriaObras() {
   const [isLoggedIn] = useState(!!localStorage.getItem("role"));
   const [pseudonimo_user] = useState(localStorage.getItem("pseudonimo"));
   const [animatingLike, setAnimatingLike] = useState(null);
-  const [userRating, setUserRating] = useState(0); // calificación seleccionada
-  const [hoverRating, setHoverRating] = useState(0); // para hover visual
+  const [userRating, setUserRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
 
 
   const navigate = useNavigate();
 
   useEffect(() => {
+
+
+    leoProfanity.loadDictionary("es");
+    leoProfanity.add("estupido");
+    leoProfanity.add("hola");
+    leoProfanity.add("imbecil");
+    leoProfanity.add("coca");
+
+  }, []);
+
+
+  useEffect(() => {
     fetch(`${API_BASE_URL}/api/obras/listaObras`)
       .then(res => res.json())
       .then(data => setAllImages(data || []))
-      .catch(err => console.error(err))
+      .catch(err => console.error(err), toast.error("❌ No se pudieron cargar los catálogos"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -78,15 +93,27 @@ export default function GaleriaObras() {
       }
 
     } catch (error) {
+      toast.error("No se pudo hacer la operación")
       console.error(error);
     } finally {
+
       setTimeout(() => setAnimatingLike(null), 500); // dura la animación
     }
   };
 
+
+
   const handleComment = async (obraId, texto, inputEl) => {
     if (!texto.trim()) return;
     if (!isLoggedIn) { navigate("/login"); return; }
+
+    // Verificar lenguaje inapropiado
+    if (leoProfanity.check(texto)) {
+      texto = leoProfanity.clean(texto);
+      alert("Tu comentario contiene lenguaje inapropiado 🚫");
+      if (inputEl) inputEl.value = "";
+      //return;
+    }
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/obras/${obraId}/comments`, {
@@ -95,6 +122,7 @@ export default function GaleriaObras() {
         credentials: "include",
         body: JSON.stringify({ texto }),
       });
+
       if (!response.ok) return;
 
       const newComment = await response.json();
@@ -108,11 +136,13 @@ export default function GaleriaObras() {
       ));
 
       if (inputEl) inputEl.value = "";
-
+      toast.success("✅ Operación realizada correctamente");
     } catch (error) {
+      toast.error("No se pudo hacer la operación")
       console.error(error);
     }
   };
+
 
   if (loading) return <div className="galeria-container"><div className="empty">Cargando obras…</div></div>;
 
@@ -126,32 +156,36 @@ export default function GaleriaObras() {
         body: JSON.stringify({ valor })
       });
 
-      if (!response.ok) throw new Error("Error al enviar la calificación");
-
-      // Actualizamos la calificación localmente
-      //const newRating = await response.json(); // si tu API devuelve el nuevo valor
+      if (!response.ok) { toast.error("No se pudo hacer la operación"); throw new Error("Error al enviar la calificación") }
       setUserRating(valor);
 
-      // También podrías actualizar selectedObra.calificaciones para recalcular promedio
       setSelectedObra(prev => prev ? { ...prev, calificaciones: [...(prev.calificaciones || []), { valor }] } : prev);
-
+      toast.success("✅ Operación realizada correctamente");
     } catch (error) {
+      toast.error("No se pudo hacer la operación");
       console.error(error);
     }
   };
 
+  const handleSelectObra = (obra) => {
+  setSelectedObra(obra);
+
+  // Buscar calificación previa del usuario
+  const calificacionUsuario = obra.calificaciones?.find(
+    (c) => c.user_name === pseudonimo_user
+  );
+
+  setUserRating(calificacionUsuario ? parseInt(calificacionUsuario.valor) : 0);
+};
+
+
 
   return (
     <div className="galeria-container">
-      <button
-        className="btn-regresar"
-        onClick={() => navigate("/")}
-      >
-        ← Menú Principal
-      </button>
+      
       <div className="cards">
         {allImages.map(obra => (
-          <div className="card" key={obra.id} onClick={() => setSelectedObra(obra)}>
+          <div className="card" key={obra.id} onClick={() => handleSelectObra(obra)}>
             <img src={obra.link_obra} alt={obra.titulo || obra.id} loading="lazy" />
 
             <div className="card-info">
@@ -228,7 +262,9 @@ export default function GaleriaObras() {
 
                 </div>
 
-                {/* Scroll de comentarios completo */}
+
+              </div>
+              <div className="modal-comments">
                 <div className="comments-list scroll">
                   {selectedObra.comentarios?.map((c, idx) => (
                     <div key={idx} className="comment">
@@ -259,6 +295,7 @@ export default function GaleriaObras() {
           </div>
         </div>
       )}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Menu, CheckCircle, XCircle, BookOpen, Edit3 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import "./AdminObras.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -9,6 +11,7 @@ export default function AdminObras() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [obras, setObras] = useState([]);
+
   const navigate = useNavigate();
   const [modalAbierto, setModalAbierto] = useState(false);
   const [estado_registro, setEstadoRegistro] = useState(null);
@@ -22,6 +25,9 @@ export default function AdminObras() {
   const [superficiesMural, setSuperficiesMural] = useState([]);
   const [ilustraciones, setIlustraciones] = useState([]);
   const [tipografias, setTipografias] = useState([]);
+
+  const [imagenModal, setImagenModal] = useState(null);
+
 
 
   useEffect(() => {
@@ -52,6 +58,7 @@ export default function AdminObras() {
         ]);
 
         if (!resTecnicas.ok || !resTipos.ok || !resConservacion.ok || !resSuperficies.ok || !resIlustraciones.ok) {
+          toast.error("No se pudo hacer la operación");
           throw new Error("Error al obtener catálogos del backend");
         }
 
@@ -62,6 +69,7 @@ export default function AdminObras() {
         setIlustraciones(await resIlustraciones.json());
         setTipografias(await resTipografias.json());
       } catch (error) {
+        toast.error("No se pudo hacer la operación")
         console.error("Error al cargar catálogos:", error);
       }
     };
@@ -131,26 +139,26 @@ export default function AdminObras() {
       });
 
       if (!response.ok) {
+        toast.error("No se pudo hacer la operación");
         throw new Error("Error al actualizar la obra");
       }
 
       const data = await response.json();
+      toast.success("✅ Operación realizada correctamente");
       return data;
     } catch (error) {
+      toast.error("No se pudo hacer la operación")
       console.error("Error:", error);
     }
   }
 
-
-  // 🔹 Cambiar estado directamente desde los iconos
-  // 🔹 Cambiar estado directamente desde los iconos
   const cambiarEstado = async (obra, index, estadoRegistroId) => {
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/obras/${obra.id}/validarobra?idRegisteredStatus=${estadoRegistroId}`,
         {
           method: "PATCH",
-          credentials: "include", // 👈 importante para enviar cookie JWT
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -158,7 +166,9 @@ export default function AdminObras() {
       );
 
       if (!response.ok) {
+        toast.error("No se pudo hacer la operación");
         throw new Error("Error al actualizar la obra");
+
       }
 
       // ✅ Actualizamos el estado local
@@ -170,9 +180,11 @@ export default function AdminObras() {
           id: estadoRegistroId,  // guardamos el nuevo id del estado
         },
       };
+      toast.success("✅ Operación realizada correctamente");
       setObras(nuevasObras);
 
     } catch (err) {
+      toast.error("No se pudo hacer la operación")
       console.error("Fallo en PATCH:", err);
     }
   };
@@ -240,6 +252,7 @@ export default function AdminObras() {
             <thead>
               <tr>
                 <th>Título de la obra</th>
+                <th>Imagen</th>
                 <th>Autor</th>
                 <th>Fecha</th>
                 <th>Tipografías</th>
@@ -258,12 +271,26 @@ export default function AdminObras() {
                 <th>Observaciones</th>
                 <th>Estado</th>
                 <th>Acciones</th>
+
               </tr>
             </thead>
             <tbody>
               {obrasFiltradas.map((obra, i) => (
                 <tr key={i}>
                   <td>{obra.titulo}</td>
+                  <td>
+                    {obra.link_obra ? (
+                      <img
+                        src={obra.link_obra}
+                        alt={obra.titulo}
+                        className="thumb-img"
+                        onClick={() => setImagenModal(obra.link_obra)}
+                      />
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+
                   <td>{obra.autor_name}</td>
                   <td>{obra.fechaCreacion}</td>
                   <td>{obra.typography?.tipografia || "—"}</td>
@@ -560,7 +587,19 @@ export default function AdminObras() {
           </div>
         </div>
       )}
+      {imagenModal && (
+        <div className="modal-img-overlay" onClick={() => setImagenModal(null)}>
+          <div className="modal-img" onClick={(e) => e.stopPropagation()}>
+            <img src={imagenModal} alt="Imagen ampliada" className="full-img" />
+            <button className="cancel-btn" onClick={() => setImagenModal(null)}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
 
+
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

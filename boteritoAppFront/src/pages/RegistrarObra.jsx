@@ -139,7 +139,7 @@ const RegistrarObra = () => {
         credentials: "include",
       });
 
-      if (!response.ok) throw new Error("Error al registrar la obra");
+      if (!response.ok) {toast.error("❌ Error al registrar la obra"); throw new Error("Error al registrar la obra");}
 
       toast.success("✅ Obra registrada correctamente");
       setObra({

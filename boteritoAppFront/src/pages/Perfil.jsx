@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import "./Perfil.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const Perfil = () => {
   const navigate = useNavigate();
   const [obrasUsuario, setObrasUsuario] = useState([]);
+  const [imagenModal, setImagenModal] = useState(null);
   const [formData, setFormData] = useState({
     nombre: "",
     fecha_nacimiento: "",
@@ -117,10 +120,10 @@ const Perfil = () => {
         role: updatedUser.role?.rol || "",
       });
 
-      alert("Perfil actualizado con éxito ✅");
+      toast.success("✅ Operación realizada correctamente");
     } catch (err) {
       console.error(err);
-      alert("No se pudo actualizar el perfil ❌");
+      toast.error("No se pudo actualizar el perfil ❌");
     }
   };
 
@@ -233,16 +236,18 @@ const Perfil = () => {
                   obrasUsuario.map((obra, i) => (
                     <tr key={i}>
                       <td>
-                        {obra.link_obra ? (
-                          <img
-                            src={obra.link_obra}
-                            alt={obra.titulo}
-                            style={{ width: "80px", borderRadius: "6px" }}
-                          />
-                        ) : (
-                          "—"
-                        )}
-                      </td>
+  {obra.link_obra ? (
+    <img
+      src={obra.link_obra}
+      alt={obra.titulo}
+      className="thumb-img"
+      onClick={() => setImagenModal(obra.link_obra)}
+    />
+  ) : (
+    "—"
+  )}
+</td>
+
                       <td>{obra.titulo}</td>
                       <td>{obra.autor_name}</td>
                       <td>{obra.fecha_registro}</td>
@@ -268,6 +273,18 @@ const Perfil = () => {
         </div>
 
       </main>
+      {imagenModal && (
+  <div className="modal-img-overlay" onClick={() => setImagenModal(null)}>
+    <div className="modal-img" onClick={(e) => e.stopPropagation()}>
+      <img src={imagenModal} alt="Imagen ampliada" className="full-img" />
+      <button className="cancel-btn" onClick={() => setImagenModal(null)}>
+        Cerrar
+      </button>
+    </div>
+  </div>
+)}
+
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

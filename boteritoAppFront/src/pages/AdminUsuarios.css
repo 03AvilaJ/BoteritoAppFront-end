@@ -50,7 +50,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,6 +76,25 @@
   border: 1px solid #ddd;
   border-radius: 5px;
 }
+
+/* Estilo del select en el modal */
+.modal select {
+  width: 100%;
+  padding: 10px;
+  margin: 15px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.modal select:focus {
+  border-color: #0077cc;
+  outline: none;
+}
+
 
 .form-actions {
   display: flex;
@@ -117,6 +136,62 @@
   border-radius: 8px;
   font-size: 14px;
 }
+
+/* modal de imagen de la obra  */
+.thumb-img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+.thumb-img:hover {
+  transform: scale(1.1);
+}
+
+/* Modal overlay genérico para imágenes */
+.modal-img-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Contenedor de la imagen */
+.modal-img {
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 95%;
+  max-height: 95%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: auto;
+}
+
+/* Imagen dentro del modal */
+.modal-img .full-img {
+  max-width: 90vw;
+  /* hasta 90% del ancho de la pantalla */
+  max-height: 90vh;
+  /* hasta 90% de la altura de la pantalla */
+  width: auto;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+
+
 
 
 /* responsive */

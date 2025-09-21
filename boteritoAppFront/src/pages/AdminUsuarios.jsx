@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./AdminUsuarios.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -17,10 +19,11 @@ export default function AdminUsuarios() {
       const res = await fetch(`${API_BASE_URL}/api/usuarios`, {
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Error cargando usuarios");
+      if (!res.ok) { toast.error("No se pudo hacer la operación"); throw new Error("Error cargando usuarios"); }
       const data = await res.json();
       setUsuarios(data);
     } catch (err) {
+      toast.error("No se pudo hacer la operación");
       console.error(err);
     } finally {
       setLoading(false);
@@ -33,10 +36,11 @@ export default function AdminUsuarios() {
       const res = await fetch(`${API_BASE_URL}/api/usuarios/roles`, {
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Error cargando roles");
+      if (!res.ok) { toast.error("No se pudo hacer la operación"); throw new Error("Error cargando roles"); }
       const data = await res.json();
       setRoles(data);
     } catch (err) {
+      toast.error("No se pudo hacer la operación");
       console.error(err);
     }
   };
@@ -62,14 +66,14 @@ export default function AdminUsuarios() {
         }),
       });
 
-      if (!res.ok) throw new Error("Error actualizando rol");
-      alert("Rol actualizado correctamente ✅");
+      if (!res.ok) { toast.error("No se pudo hacer la operación"); throw new Error("Error actualizando rol"); }
       setSelectedUser(null);
       setNewRole("");
       fetchUsuarios();
+      toast.success("✅ Operación realizada correctamente");
     } catch (err) {
+      toast.error("No se pudo hacer la operación");
       console.error(err);
-      alert("No se pudo actualizar el rol ❌");
     }
   };
 
@@ -164,6 +168,7 @@ export default function AdminUsuarios() {
           </div>
         </div>
       )}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

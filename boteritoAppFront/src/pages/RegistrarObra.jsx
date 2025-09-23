@@ -36,7 +36,7 @@ const RegistrarObra = () => {
     tecnica: '',
     psuedonimo: '',
     fecha_registro: '',
-    fecha: '',
+    fechaCreacion: '',
     descripcion: '',
     imagen: null,
     alto: '',
@@ -148,7 +148,7 @@ const RegistrarObra = () => {
         psuedonimo: '',
         fecha_registro: '',
         tecnica: '',
-        fecha: '',
+        fechaCreacion: '',
         descripcion: '',
         imagen: null,
         alto: '',
@@ -173,7 +173,7 @@ const RegistrarObra = () => {
       return obra.titulo.trim() !== "" &&
         obra.autor_name.trim() !== "" &&
         obra.tecnica.trim() !== "" &&
-        obra.fecha.trim() !== "" &&
+        obra.fechaCreacion.trim() !== "" &&
         obra.descripcion.trim() !== "" &&
         obra.imagen !== null;
     }
@@ -212,7 +212,7 @@ const RegistrarObra = () => {
               </select>
 
               <label htmlFor="fecha" className="input-label">Fecha de creación del mural</label>
-              <input type="date" id="fecha" name="fecha" value={obra.fecha} onChange={handleChange} required />
+              <input type="date" id="fechaCreacion" name="fechaCreacion" value={obra.fechaCreacion} onChange={handleChange} required />
 
               <textarea name="descripcion" placeholder="Descripción" value={obra.descripcion} onChange={handleChange} />
 

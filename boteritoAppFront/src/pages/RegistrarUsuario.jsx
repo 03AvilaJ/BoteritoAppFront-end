@@ -65,7 +65,7 @@ export default function Register() {
       alert("Registro exitoso ✅");
       e.target.reset(); // limpiar form
       setTimeout(() => {
-        navigate("/home");
+        navigate("/");
       }, 2000);
     } catch (error) {
       console.error("Error en el registro:", error);

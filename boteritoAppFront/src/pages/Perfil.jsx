@@ -210,7 +210,6 @@ const Perfil = () => {
                   <th>Título</th>
                   <th>Autor</th>
                   <th>Fecha Registro</th>
-                  <th>Ubicación</th>
                   <th>Estado de registro</th>
                 </tr>
               </thead>
@@ -239,7 +238,6 @@ const Perfil = () => {
                       <td>{obra.titulo}</td>
                       <td>{obra.autor_name}</td>
                       <td>{obra.fecha_registro}</td>
-                      <td>{obra.ubicacion?.direccion || "—"}</td>
                       <td>
                         <span
                           className={`status ${

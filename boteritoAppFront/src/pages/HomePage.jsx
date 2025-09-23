@@ -117,7 +117,7 @@ const HomePage = () => {
           <Menu className="menu-icon" onClick={toggleMenu} />
           <nav>
             <ul>
-              <li className="active">Mapa</li>
+              <li className="active"></li>
             </ul>
           </nav>
         </div>

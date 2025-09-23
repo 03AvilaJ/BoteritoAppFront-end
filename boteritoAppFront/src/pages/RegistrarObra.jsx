@@ -234,9 +234,9 @@ const RegistrarObra = () => {
 
           {step === 2 && (
             <>
-              <input type="text" name="alto" placeholder="Alto" value={obra.alto} onChange={handleChange} />
-              <input type="text" name="ancho" placeholder="Ancho" value={obra.ancho} onChange={handleChange} />
-              <textarea name="mensajeObra" placeholder="Mensaje de la obra" value={obra.mensajeObra} onChange={handleChange} />
+              <input type="text" name="alto" placeholder="Alto cm" value={obra.alto} onChange={handleChange} />
+              <input type="text" name="ancho" placeholder="Ancho cm" value={obra.ancho} onChange={handleChange} />
+              <textarea name="mensajeObra" placeholder="Mensaje que le transmite de la obra" value={obra.mensajeObra} onChange={handleChange} />
 
               <select name="tipoMural" value={obra.tipoMural} onChange={handleChange} required>
                 <option value="">Seleccione tipo de mural</option>

@@ -71,19 +71,13 @@ const Perfil = () => {
 
   const handleLogout = async () => {
     try {
-      // Elimina el rol del localStorage
       localStorage.removeItem("role");
-
-
-      // Llamada al backend para limpiar cookie
       const response = await fetch(`${API_BASE_URL}/auth/logout`, {
         method: "POST",
-        credentials: "include", // necesario para mandar la cookie
+        credentials: "include",
       });
 
-      if (response.ok) {
-        console.log("Logout exitoso");
-      } else {
+      if (!response.ok) {
         console.error("Error al cerrar sesión");
       }
       navigate("/");
@@ -99,8 +93,8 @@ const Perfil = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // 🔹 manda la cookie con el JWT
-        body: JSON.stringify({ biografia: formData.biografia }), // 🔹 manda los datos editados
+        credentials: "include",
+        body: JSON.stringify({ biografia: formData.biografia }),
       });
 
       if (!response.ok) {
@@ -108,9 +102,6 @@ const Perfil = () => {
       }
 
       const updatedUser = await response.json();
-      console.log("Perfil actualizado:", updatedUser);
-
-      // Actualiza el formData con lo que responde el backend
       setFormData({
         nombre: updatedUser.nombre || "",
         fechaNacimiento: updatedUser.fechaNacimiento || "",
@@ -126,7 +117,6 @@ const Perfil = () => {
       toast.error("No se pudo actualizar el perfil ❌");
     }
   };
-
 
   return (
     <div className="perfil-container">
@@ -187,11 +177,11 @@ const Perfil = () => {
               </div>
               <div>
                 <label>Biografia</label>
-                <input
-                  type="text"
+                <textarea
                   name="biografia"
                   value={formData.biografia}
                   onChange={handleChange}
+                  className="biografia-textarea"
                 />
               </div>
               <div>
@@ -207,7 +197,6 @@ const Perfil = () => {
             <button type="button" className="save-btn" onClick={handleUpdate}>
               Guardar Cambios
             </button>
-
           </form>
         </div>
 
@@ -222,7 +211,7 @@ const Perfil = () => {
                   <th>Autor</th>
                   <th>Fecha Registro</th>
                   <th>Ubicación</th>
-                  <th>Estado de resgistro</th>
+                  <th>Estado de registro</th>
                 </tr>
               </thead>
               <tbody>
@@ -236,30 +225,30 @@ const Perfil = () => {
                   obrasUsuario.map((obra, i) => (
                     <tr key={i}>
                       <td>
-  {obra.link_obra ? (
-    <img
-      src={obra.link_obra}
-      alt={obra.titulo}
-      className="thumb-img"
-      onClick={() => setImagenModal(obra.link_obra)}
-    />
-  ) : (
-    "—"
-  )}
-</td>
-
+                        {obra.link_obra ? (
+                          <img
+                            src={obra.link_obra}
+                            alt={obra.titulo}
+                            className="thumb-img"
+                            onClick={() => setImagenModal(obra.link_obra)}
+                          />
+                        ) : (
+                          "—"
+                        )}
+                      </td>
                       <td>{obra.titulo}</td>
                       <td>{obra.autor_name}</td>
                       <td>{obra.fecha_registro}</td>
                       <td>{obra.ubicacion?.direccion || "—"}</td>
                       <td>
                         <span
-                          className={`status ${obra.registeredStatus?.estado_registro === "validado"
-                            ? "status-aprobado"
-                            : obra.registeredStatus?.estado_registro === "rechazado"
+                          className={`status ${
+                            obra.registeredStatus?.estado_registro === "validado"
+                              ? "status-aprobado"
+                              : obra.registeredStatus?.estado_registro === "rechazado"
                               ? "status-rechazado"
                               : "status-pendiente"
-                            }`}
+                          }`}
                         >
                           {obra.registeredStatus?.estado_registro}
                         </span>
@@ -271,18 +260,18 @@ const Perfil = () => {
             </table>
           </div>
         </div>
-
       </main>
+
       {imagenModal && (
-  <div className="modal-img-overlay" onClick={() => setImagenModal(null)}>
-    <div className="modal-img" onClick={(e) => e.stopPropagation()}>
-      <img src={imagenModal} alt="Imagen ampliada" className="full-img" />
-      <button className="cancel-btn" onClick={() => setImagenModal(null)}>
-        Cerrar
-      </button>
-    </div>
-  </div>
-)}
+        <div className="modal-img-overlay" onClick={() => setImagenModal(null)}>
+          <div className="modal-img" onClick={(e) => e.stopPropagation()}>
+            <img src={imagenModal} alt="Imagen ampliada" className="full-img" />
+            <button className="cancel-btn" onClick={() => setImagenModal(null)}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
 
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

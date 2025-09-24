@@ -327,3 +327,11 @@ html, body, #root {
   box-sizing: border-box;
 }
 
+.biografia-textarea {
+  width: 100%;          /* ocupar el mismo ancho que los otros inputs */
+  resize: none;         /* opcional: desactivar redimensionado manual */
+  overflow-y: auto;     /* mostrar scroll vertical cuando el texto exceda */
+  min-height: 100px;    /* altura mínima */
+  max-height: 200px;    /* altura máxima antes de scroll */
+  box-sizing: border-box; /* incluir padding/border en el cálculo del ancho */
+}

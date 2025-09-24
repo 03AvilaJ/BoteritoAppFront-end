@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import "./RegistrarUsuario.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -8,7 +8,22 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export default function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [passwordError, setPasswordError] = useState(""); // 🔹 para mostrar error inmediato
   const navigate = useNavigate();
+
+  // Validar la contraseña en tiempo real al salir del input
+  const validatePassword = (password) => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      setPasswordError(
+        "La contraseña debe tener mínimo 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial."
+      );
+    } else {
+      setPasswordError("");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +34,7 @@ export default function Register() {
     const email = e.target.email.value.trim();
     const password = e.target.password.value.trim();
     const confirmPassword = e.target.confirmPassword.value.trim();
-    const fecha_nacimiento = e.target.fecha_nacimiento.value; // ya es formato yyyy-MM-dd
+    const fecha_nacimiento = e.target.fecha_nacimiento.value;
 
     // Validaciones básicas
     if (!nombre || !pseudonimo || !email || !password || !confirmPassword || !fecha_nacimiento) {
@@ -27,28 +42,46 @@ export default function Register() {
       setSuccess("");
       return;
     }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("El correo electrónico no tiene un formato válido.");
+      setSuccess("");
+      return;
+    }
+
+    // Validar contraseña otra vez antes de enviar
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      setError(
+        "La contraseña no cumple con los requisitos de seguridad."
+      );
+      setSuccess("");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       setSuccess("");
       return;
     }
 
-    // Si todo está bien, limpiar error
+    // Si todo está bien
     setError("");
     setSuccess("");
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/usuarios/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre,
           pseudonimo,
           email,
           password,
-          roles_id: "689bd2e00691edc2fc5831fd", // lo defines fijo o lo sacas de otro campo
+          roles_id: "689bd2e00691edc2fc5831fd",
           fecha_nacimiento,
         }),
       });
@@ -61,9 +94,9 @@ export default function Register() {
       }
 
       const data = await response.json();
-      setSuccess("✅ Usuario creado:" + data.email);
+      setSuccess("✅ Usuario creado: " + data.email);
       alert("Registro exitoso ✅");
-      e.target.reset(); // limpiar form
+      e.target.reset();
       setTimeout(() => {
         navigate("/");
       }, 2000);
@@ -78,7 +111,7 @@ export default function Register() {
       <div className="overlay"></div>
 
       <div className="register-container">
-        {/* Mensaje de error */}
+        {/* Mensajes de error/éxito */}
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
 
@@ -87,10 +120,24 @@ export default function Register() {
         {/* Formulario */}
         <form className="register-form" onSubmit={handleSubmit}>
           <input type="text" name="nombre" placeholder="Nombre" />
-          <input type="email" name="email" placeholder="Email" />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
+            pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+          />
           <input type="text" name="pseudonimo" placeholder="Pseudonimo" />
           <input type="date" name="fecha_nacimiento" placeholder="Fecha de Nacimiento" />
-          <input type="password" name="password" placeholder="Contraseña" />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Contraseña"
+            onBlur={(e) => validatePassword(e.target.value)} // 🔹 valida al salir del campo
+          />
+          {passwordError && <p className="error-message">{passwordError}</p>}
+
           <input type="password" name="confirmPassword" placeholder="Confirmar Contraseña" />
 
           <button type="submit" className="btn-submit">
@@ -100,8 +147,7 @@ export default function Register() {
 
         {/* Enlace de inicio de sesión */}
         <p className="login-link">
-          Ya tienes una cuenta?{" "}
-          <a href="/login">Iniciar Sesión</a>
+          ¿Ya tienes una cuenta? <a href="/login">Iniciar Sesión</a>
         </p>
 
         {/* Botón Google */}

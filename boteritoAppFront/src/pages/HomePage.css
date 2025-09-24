@@ -262,16 +262,22 @@ body {
 .ver-galeria-container {
   display: flex;
   justify-content: center;
-  margin-top: 12px;
-  /* espacio entre carrusel y botón */
+  align-items: center;
+  margin: 0;          /* ❌ quita el margin que lo saca */
+  padding: 8px 0;     /* ✔ usa padding interno */
+  position: absolute; /* ✔ lo fijamos dentro del carrusel */
+  bottom: 8px;        /* ✔ lo pegamos al fondo del carrusel */
+  left: 50%;          /* ✔ centrado horizontal */
+  transform: translateX(-50%);
 }
+
 
 .btn-ver-galeria {
   background: rgba(0, 0, 0, 0.7);
   border: none;
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
+  width: 54px;   /* ✔ un poco más grande */
+  height: 54px;
   cursor: pointer;
   color: white;
   display: flex;
@@ -279,6 +285,7 @@ body {
   justify-content: center;
   transition: background 0.3s ease, transform 0.2s ease;
 }
+
 
 .btn-ver-galeria:hover {
   background: rgba(0, 0, 0, 0.9);
@@ -459,5 +466,37 @@ body {
   padding-top: 0 !important;
 }
 
+/* Contenedor de cada imagen */
+.image-clickable {
+  flex: 1 1 25%; /* 4 imágenes por fila */
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Imagenes dentro del carrusel */
+.image-clickable img {
+  width: 100%;
+  max-width: 220px;   /* 🔹 Tamaño máximo fijo */
+  height: 180px;      /* 🔹 Alto fijo para uniformidad */
+  object-fit: cover;  /* 🔹 Recorta para que no se deformen */
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease;
+}
+
+.image-clickable img:hover {
+  transform: scale(1.05);
+}
+
+/* Grupo de imágenes (slide) */
+.slide-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px; /* separación entre imágenes */
+}
 
 

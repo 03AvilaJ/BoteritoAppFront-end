@@ -199,7 +199,10 @@ const HomePage = () => {
                   )}
                 </div>
               )}
-              <li onClick={closeMenu}><Image size={20} /> <span>Galería</span></li>
+              <li onClick={() => {
+                  closeMenu();
+                  navigate("/galeria");
+                }}><Image size={20} /> <span>Galería</span></li>
 
               <li
                 onClick={() => {
@@ -279,26 +282,20 @@ const HomePage = () => {
             {groups.map((group, groupIndex) => (
               <div key={groupIndex} className="slide-group">
                 {group.map((img, index) => (
-                  <img
-                    key={index}
-                    src={img.link_obra}
-                    alt={`Obra ${index}`}
-                  />
+                  <div
+            key={index}
+            className="image-clickable"
+            onClick={() => navigate("/galeria")}
+          >
+            <img
+              src={img.link_obra}
+              alt={`Obra ${index}`}
+            />
+          </div>
                 ))}
-              </div>
+          </div>
             ))}
           </div>
-
-          {/* Botón centrado debajo del carrusel */}
-          <div className="ver-galeria-container">
-            <button
-              onClick={() => navigate("/galeria")}
-              className="btn-ver-galeria"
-            >
-              <ArrowDownCircle size={36} />
-            </button>
-          </div>
-
         </div>
 
 

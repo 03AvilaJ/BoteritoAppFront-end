@@ -1,62 +1,98 @@
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --sidebar-height: 72px;
+}
+
+/* ---------- Layout principal ---------- */
 .perfil-container {
   display: flex;
   min-height: 100vh;
   font-family: Arial, sans-serif;
+  overflow: visible;
+  align-items: stretch;
 }
 
-/* Sidebar */
-.sidebar {
-  flex-shrink: 0;           /* evita que se achique */
-  width: 220px;
+
+
+/* Sidebar (desktop por defecto) */
+.perfil-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--sidebar-height);
   background-color: #f9f9f9;
-  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-  padding: 15px;
+  padding: 0 20px;
+  z-index: 1200;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
 .sidebar-header {
-  text-align: center;
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
 }
 
+/* Logo y descripción */
 .logo {
-  font-size: 30px;
+  font-size: 22px;
+  line-height: 1;
 }
-
 .description {
   font-size: 14px;
   color: #555;
+  margin: 0;
 }
 
+/* Menú horizontal en el centro/izquierda (según espacio) */
 .menu {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  gap: 18px;
+  align-items: center;
+  margin-left: 12px;
 }
 
 .menu a {
   text-decoration: none;
   color: black;
-  font-size: 16px;
-  padding: 5px;
-  transition: color 0.2s ease;
+  font-size: 15px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  transition: background-color 0.15s, color 0.15s;
+  cursor: pointer;
 }
 
 .menu a:hover,
 .menu a.active {
   color: #007bff;
+  background: rgba(0,123,255,0.06);
 }
 
+/* Botón de logout a la derecha */
 .logout-btn {
   background-color: #ff4d4d;
   color: white;
   border: none;
-  padding: 10px;
-  cursor: pointer;
+  padding: 8px 16px;   /* ⬅️ menos ancho */
   border-radius: 6px;
-  margin-top: auto;
+  cursor: pointer;
+  white-space: nowrap;
+  margin: 0;
+  width: auto;         /* ⬅️ no ocupar todo el ancho */
+  min-width: 110px;    /* ⬅️ ancho mínimo bonito */
+  text-align: center;
 }
 
 .logout-btn:hover {
@@ -110,46 +146,44 @@
 
 /* Contenedor principal */
 .perfil-content {
-  flex: 1;
-  background-color: #fdfdfd;
-  padding: 40px;
-  display: flex;
-  flex-direction: column; /* perfil arriba, obras abajo */
-  gap: 40px; /* espacio entre perfil y tabla */
-  margin-left: 220px; 
+  width: 100%;
+  box-sizing: border-box; /* que el padding no provoque overflow */
+  margin-left: 0 !important;
+  margin-top: calc(var(--sidebar-height) + 20px);
+  padding: 24px; /* ajusta si quieres más/menos espacio lateral */
 }
+
+
+
 
 /* Caja de perfil */
-.form-box {
-  position: relative;  /* 🔹 asegura que el edit-btn no rompa el layout */
-  background: #f7f7f7;
-  padding: 25px;
-  border-radius: 10px;
-  width: 100%;
-  max-width: 700px;
-}
-
-/* Caja de mis obras */
+.perfil-form-box,
 .mis-obras-container {
-  background: #fff;
-  padding: 25px;
-  border-radius: 10px;
   width: 100%;
-  overflow-x: auto;   /* 🔹 si la tabla es ancha, aparece scroll horizontal */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  max-width: none;       /* importantísimo: quitar max-width */
+  box-sizing: border-box;
+  margin: 0 0 24px 0;    /* separación vertical */
 }
 
+/* Header de la sección */
 .mis-obras-container h2 {
   margin-bottom: 15px;
+  flex: 0 0 auto;
 }
 
 .table-container {
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  box-sizing: border-box;
 }
 
+/* Table styles */
 .admin-table {
   width: 100%;
-  border-collapse: collapse;
+  min-width: 0 !important;
+  table-layout: auto; /* o fixed si quieres columnas iguales */
 }
 
 .admin-table th,
@@ -165,6 +199,8 @@
 
 /* 📱 RESPONSIVE */
 @media (max-width: 768px) {
+  :root { --sidebar-height: 72px; }
+
   .perfil-container {
     flex-direction: column;
   }
@@ -192,21 +228,14 @@
     gap: 6px;
   }
 
-  .menu {
-    flex-direction: row;
-    gap: 16px;
-  }
+  .menu { gap: 12px; }
+  .description { display: none; } /* si quieres simplificar en móviles */
+  .perfil-content { margin-top: calc(var(--sidebar-height) + 12px); padding: 20px; }  
 
   .logout-btn {
     margin-top: 0;
     padding: 6px 12px;
     font-size: 14px;
-  }
-
-  .perfil-content {
-    margin-left: 0; 
-    padding: 20px;
-    margin-top: 100px; /* ⬅️ más espacio para que el form no se esconda debajo */
   }
 
   .form-grid {
@@ -283,10 +312,18 @@
   cursor: pointer;
   border-radius: 4px;
   transition: transform 0.2s;
+  flex-shrink: 0;
 }
 
 .thumb-img:hover {
   transform: scale(1.1);
 }
 
+/* override global (útil si #root / body están limitando el scroll) */
+html, body, #root {
+  overflow-x: hidden;    /* evita scrollbar horizontal por padding negativo */
+  overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
 

@@ -94,11 +94,13 @@ const Perfil = () => {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ biografia: formData.biografia }),
+        body: JSON.stringify({ biografia: formData.biografia, pseudonimo: formData.pseudonimo }),
       });
 
       if (!response.ok) {
-        throw new Error("Error al actualizar perfil");
+        const errorData = await response.json().catch(() => null);
+        const errorMessage = errorData?.message || errorData?.error || "Error al actualizar perfil";
+        throw new Error(errorMessage);
       }
 
       const updatedUser = await response.json();
@@ -113,15 +115,15 @@ const Perfil = () => {
 
       toast.success("✅ Operación realizada correctamente");
     } catch (err) {
-      console.error(err);
-      toast.error("No se pudo actualizar el perfil ❌");
+      console.error(err.message);
+      toast.error(err.message, "No se pudo actualizar el perfil ❌");
     }
   };
 
   return (
     <div className="perfil-container">
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className="perfil-sidebar">
         <div className="sidebar-header">
           <div className="logo">🎨</div>
           <p className="description">PERFIL <br /> </p>
@@ -136,7 +138,7 @@ const Perfil = () => {
 
       {/* Contenido principal */}
       <main className="perfil-content">
-        <div className="form-box">
+        <div className="perfil-form-box">
           <form>
             <div className="form-grid">
               <div>
@@ -163,7 +165,8 @@ const Perfil = () => {
                   type="text"
                   name="pseudonimo"
                   value={formData.pseudonimo}
-                  readOnly
+                  onChange={handleChange}
+                  
                 />
               </div>
               <div>

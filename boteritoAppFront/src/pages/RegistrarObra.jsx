@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './RegistrarObra.css';
+import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -29,7 +30,7 @@ const LocationPicker = ({ setLatLng }) => {
 
 const RegistrarObra = () => {
   const [step, setStep] = useState(1);
-
+  const navigate = useNavigate();
   const [obra, setObra] = useState({
     titulo: '',
     autor_name: '',
@@ -229,13 +230,14 @@ const RegistrarObra = () => {
                   toast.warning("⚠️ Completa todos los campos del paso 1 antes de continuar.");
                 }
               }}>Siguiente</button>
+              <button type="button" onClick={() => navigate("/")}>Menu Principal</button>
             </>
           )}
 
           {step === 2 && (
             <>
-              <input type="text" name="alto" placeholder="Alto cm" value={obra.alto} onChange={handleChange} />
-              <input type="text" name="ancho" placeholder="Ancho cm" value={obra.ancho} onChange={handleChange} />
+              <input type="number" name="alto" placeholder="Alto cm" value={obra.alto} onChange={handleChange} />
+              <input type="number" name="ancho" placeholder="Ancho cm" value={obra.ancho} onChange={handleChange} />
               <textarea name="mensajeObra" placeholder="Mensaje que le transmite de la obra" value={obra.mensajeObra} onChange={handleChange} />
 
               <select name="tipoMural" value={obra.tipoMural} onChange={handleChange} required>
@@ -268,6 +270,7 @@ const RegistrarObra = () => {
                     toast.warning("⚠️ Completa todos los campos del paso 2 antes de continuar.");
                   }
                 }}>Siguiente</button>
+                <button type="button" onClick={() => navigate("/")}>Menu Principal</button>
               </div>
             </>
           )}
@@ -297,6 +300,7 @@ const RegistrarObra = () => {
               <div className="button-group">
                 <button type="button" onClick={() => setStep(2)}>Anterior</button>
                 <button type="submit">Registrar</button>
+                <button type="button" onClick={() => navigate("/")}>Menu Principal</button>
               </div>
             </>
           )}

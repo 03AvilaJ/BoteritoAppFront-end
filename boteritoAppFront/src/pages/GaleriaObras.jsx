@@ -268,7 +268,7 @@ export default function GaleriaObras() {
     // Verificar lenguaje inapropiado
     if (leoProfanity.check(texto)) {
       texto = leoProfanity.clean(texto);
-      alert("Tu comentario contiene lenguaje inapropiado 🚫");
+      toast.error("Tu comentario contiene lenguaje inapropiado 🚫");
       if (inputEl) inputEl.value = "";
       //return;
     }

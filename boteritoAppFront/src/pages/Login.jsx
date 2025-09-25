@@ -18,7 +18,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const email = e.target.email.value.trim();
+    const email = e.target.email.value.trim().toLowerCase();
     const password = e.target.password.value.trim();
 
     if (!email || !password) {
@@ -40,17 +40,17 @@ export default function Login() {
       const data = await response.json();
       console.log(data);
 
-
       if (!response.ok) {
-        throw new Error("Credenciales inválidas o error en el servidor");
+        // 👈 usamos el mensaje que devuelva el backend o un texto genérico
+        throw new Error(data.error || data.message || "Credenciales inválidas");
       }
 
       if (data.role) {
-      localStorage.setItem("role", data.role); // 👈 Guardamos el rol
-    }
-    if (data.pseudonimo) {
-      localStorage.setItem("pseudonimo", data.pseudonimo); // 👈 Guardamos el rol
-    }
+        localStorage.setItem("role", data.role); 
+      }
+      if (data.pseudonimo) {
+        localStorage.setItem("pseudonimo", data.pseudonimo); 
+      }
 
       // 👈 Redirigir a la página donde estaba antes
       navigate(from, { replace: true });
@@ -74,11 +74,10 @@ export default function Login() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error con Google login");
+      if (!response.ok) throw new Error(data.error || data.message || "Error con Google login");
 
       if (data.role) localStorage.setItem("role", data.role);
       if (data.pseudonimo) localStorage.setItem("pseudonimo", data.pseudonimo);
-      console.log(data.role)
 
       navigate(from, { replace: true });
     } catch (err) {
@@ -100,7 +99,12 @@ export default function Login() {
         <h2 className="title">Iniciar Sesión</h2>
 
         <form className="login-form" onSubmit={handleSubmit}>
-          <input type="email" name="email" placeholder="Email" />
+          <input 
+            type="email" 
+            name="email" 
+            placeholder="Email"  
+            onChange={(e) => { e.target.value = e.target.value.toLowerCase(); }}
+          />
           <input type="password" name="password" placeholder="Contraseña" />
           <button type="submit" className="btn-submit" disabled={loading}>
             {loading ? "Cargando..." : "Ingresar"}
@@ -108,13 +112,12 @@ export default function Login() {
         </form>
 
         <p className="register-link">
-          No tienes una cuenta? <a href="/RegistrarUsuario">Regístrate</a>
+          ¿No tienes una cuenta? <a href="/RegistrarUsuario">Regístrate</a>
         </p>
 
         <p className="forgot-password">
           ¿Olvidaste tu contraseña? <a href="/forgot-password">Recupérala aquí</a>
         </p>
-
 
         <div className="btn-google">
           <GoogleLogin

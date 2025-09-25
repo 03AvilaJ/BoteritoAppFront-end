@@ -159,6 +159,9 @@ export default function Register() {
             placeholder="Email"
             required
             pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+             onChange={(e) => {
+    e.target.value = e.target.value.toLowerCase();
+  }}
           />
           <input type="text" name="pseudonimo" placeholder="Pseudonimo" />
 
